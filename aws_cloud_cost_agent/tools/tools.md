@@ -16,6 +16,14 @@
 - `get_service_sku_breakdown`: breaks one service down by usage type, operation, and region.
 - Prompt: `cost_analysis/service_sku_analysis_prompt.md`; it is rendered and run separately for every selected service/SKU.
 
+### Elastic Load Balancing
+
+- `get_elb_component_costs`: returns exact ELB costs by usage type, operation, and region.
+- `get_elb_resource_costs`: attempts opt-in daily resource-level ELB costs for AWS's available 14-day window.
+- `get_elb_inventory`: lists Classic, Application, Network, and Gateway load balancers plus listeners, target groups, and targets in regions with ELB spend.
+- `get_elb_utilization`: reads per-load-balancer CloudWatch traffic and LCU billing metrics for explicitly estimated dollar attribution.
+- Prompt: `cost_analysis/elb_analysis_prompt.md`.
+
 ## Cost recommendations
 
 - `get_ec2_rightsizing_recommendations`: reads EC2 rightsizing recommendations.

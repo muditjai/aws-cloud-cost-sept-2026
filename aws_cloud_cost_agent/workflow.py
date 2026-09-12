@@ -7,6 +7,7 @@ from .agent import run_markdown_agent
 from .prompt_loader import load_prompt
 from .tools.auth.aws_auth import get_account_identity_data, render_connection_check
 from .tools.bill_read.aws_billing import build_overall_bill_report
+from .tools.cost_analysis.elb import ELB_SERVICE
 from .tools.cost_analysis.per_technology import discover_top_service_skus
 from .tools.shared import AwsToolConfig, slug
 from .tools.tools_main import (
@@ -87,8 +88,13 @@ async def run_workflow(
         artifact_suffix = f"{slug(service)}_{slug(sku)}_{start_date}_{end_date}.md"
 
         if "service-analysis" in steps:
+            prompt_name = (
+                "elb_analysis_prompt.md"
+                if service == ELB_SERVICE
+                else "service_sku_analysis_prompt.md"
+            )
             prompt = load_prompt(
-                prompts / "cost_analysis" / "service_sku_analysis_prompt.md",
+                prompts / "cost_analysis" / prompt_name,
                 **values,
             )
             markdown = await run_markdown_agent(
