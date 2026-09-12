@@ -29,6 +29,25 @@ DEFAULT_PORT = 8765
 MAX_FORM_BYTES = 64 * 1024
 ACCOUNT_PATTERN = re.compile(r"^\d{12}$")
 MODEL_STEPS = {"service-analysis", "recommendations"}
+ARTIFACT_GROUPS = (
+    "Connection Check",
+    "Overall Bill",
+    "Per Service Analysis",
+)
+
+
+def _group_artifacts(artifacts: list[Path]) -> dict[str, list[Path]]:
+    """Group generated reports by workflow stage while preserving their order."""
+    grouped = {name: [] for name in ARTIFACT_GROUPS}
+    for path in artifacts:
+        if path.name.startswith("connection_check_"):
+            group = "Connection Check"
+        elif path.name.startswith("overall_bill_data_"):
+            group = "Overall Bill"
+        else:
+            group = "Per Service Analysis"
+        grouped[group].append(path)
+    return grouped
 
 
 @dataclass
@@ -208,12 +227,28 @@ class CostAgentHandler(BaseHTTPRequestHandler):
         if not selected and artifacts:
             selected = artifacts[0]
 
-        artifact_items = []
-        for path in artifacts:
-            selected_class = " is-selected" if selected == path else ""
-            artifact_items.append(
-                f'<li><a class="artifact-link{selected_class}" '
-                f'href="/?artifact={quote(path.name)}">{html.escape(path.name)}</a></li>'
+        artifact_groups = []
+        for group_name, paths in _group_artifacts(artifacts).items():
+            items = []
+            for path in paths:
+                selected_class = " is-selected" if selected == path else ""
+                items.append(
+                    f'<li><a class="artifact-link{selected_class}" '
+                    f'href="/?artifact={quote(path.name)}">{html.escape(path.name)}</a></li>'
+                )
+            contents = (
+                f'<ul>{"".join(items)}</ul>'
+                if items
+                else '<p class="artifact-group-empty">No reports</p>'
+            )
+            artifact_groups.append(
+                '<section class="artifact-group">'
+                '<div class="artifact-group-heading">'
+                f'<h3>{html.escape(group_name)}</h3>'
+                f'<span>{len(paths)}</span>'
+                '</div>'
+                f'{contents}'
+                '</section>'
             )
 
         if selected:
@@ -248,7 +283,7 @@ class CostAgentHandler(BaseHTTPRequestHandler):
             start_date=(today - timedelta(days=30)).isoformat(),
             end_date=today.isoformat(),
             csrf_token=html.escape(self.csrf_token),
-            artifact_items="".join(artifact_items),
+            artifact_groups="".join(artifact_groups),
             artifact_viewer=viewer,
             run_id=html.escape(run_id),
             status_text=html.escape(status_text),
