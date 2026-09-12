@@ -10,7 +10,7 @@ from .tools.function_tool import FunctionTool
 
 
 RESPAN_BASE_URL = "https://api.respan.ai/api/"
-RESPAN_MODEL = "gpt-5.4"
+RESPAN_MODEL = "gemini/gemini-3.7-flash"
 MAX_TOOL_ROUNDS = 20
 
 
