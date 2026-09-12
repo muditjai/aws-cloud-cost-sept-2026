@@ -51,9 +51,9 @@ AWS_SECRET_ACCESS_KEY=<aws-secret-access-key>
 AWS_REGION=us-east-1
 ```
 
-`OPENAI_API_KEY` is required for billing analysis and recommendation steps. The
-`connection-check` step calls AWS STS and writes its report locally without
-contacting OpenAI.
+`OPENAI_API_KEY` is required for service analysis and recommendation steps. The
+`connection-check` and `overall-bill` steps query AWS and calculate their reports
+locally without contacting OpenAI.
 
 ```bash
 OPENAI_API_KEY=<openai-api-key>

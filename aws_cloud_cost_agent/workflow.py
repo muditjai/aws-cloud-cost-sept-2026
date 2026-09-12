@@ -6,10 +6,10 @@ from pathlib import Path
 from .agent import run_markdown_agent
 from .prompt_loader import load_prompt
 from .tools.auth.aws_auth import get_account_identity_data, render_connection_check
+from .tools.bill_read.aws_billing import build_overall_bill_report
 from .tools.cost_analysis.per_technology import discover_top_service_skus
 from .tools.shared import AwsToolConfig, slug
 from .tools.tools_main import (
-    overall_bill_tools,
     recommendation_tools,
     service_analysis_tools,
 )
@@ -64,8 +64,7 @@ async def run_workflow(
         )
 
     if "overall-bill" in steps:
-        prompt = load_prompt(prompts / "bill_read" / "overall_bill_prompt.md", **common)
-        markdown = await run_markdown_agent("AWS overall bill", prompt, overall_bill_tools(config))
+        markdown = build_overall_bill_report(config, actual_account, start_date, end_date)
         artifacts.append(
             _write_artifact(
                 config.output_dir,

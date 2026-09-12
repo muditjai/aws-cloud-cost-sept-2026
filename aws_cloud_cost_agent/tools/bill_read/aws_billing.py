@@ -16,6 +16,7 @@ from ..shared import (
     csv_values,
     json_dumps,
     parse_filter,
+    summarize_cost_groups,
     validate_all,
 )
 
@@ -44,6 +45,98 @@ def fetch_cost_and_usage(
 
     client = create_boto3_session(config).client("ce", region_name="us-east-1")
     return collect_pages(client, "get_cost_and_usage", "ResultsByTime", **request)
+
+
+def _money(amount: float) -> str:
+    return f"-${abs(amount):,.2f}" if amount < 0 else f"${amount:,.2f}"
+
+
+def _estimated(data: dict[str, Any]) -> bool:
+    return any(item.get("Estimated", False) for item in data.get("items", []))
+
+
+def _cost_table(rows: list[dict[str, Any]], key_headers: list[str], limit: int = 10) -> str:
+    header = "| " + " | ".join([*key_headers, "Cost"]) + " |"
+    separator = "|" + "|".join(["---"] * len(key_headers) + ["---:"]) + "|"
+    body = []
+    for row in rows[:limit]:
+        keys = [str(value) for value in row.get("keys", [])]
+        keys.extend(["Unknown"] * (len(key_headers) - len(keys)))
+        body.append("| " + " | ".join([*keys[: len(key_headers)], _money(row["amount"])]) + " |")
+    return "\n".join([header, separator, *body])
+
+
+def render_overall_bill_report(
+    account_id: str,
+    start_date: str,
+    end_date: str,
+    service_data: dict[str, Any],
+    region_data: dict[str, Any],
+    service_sku_data: dict[str, Any],
+) -> str:
+    """Render Cost Explorer totals deterministically rather than asking a model to calculate them."""
+    services = summarize_cost_groups(service_data, "UnblendedCost")
+    regions = summarize_cost_groups(region_data, "UnblendedCost")
+    service_skus = summarize_cost_groups(service_sku_data, "UnblendedCost")
+    service_total = sum(row["amount"] for row in services)
+    region_total = sum(row["amount"] for row in regions)
+    service_sku_total = sum(row["amount"] for row in service_skus)
+    includes_estimates = any(_estimated(data) for data in (service_data, region_data, service_sku_data))
+
+    return f"""# Overall AWS Bill
+
+- **Account:** `{account_id}`
+- **Billing period:** `{start_date}` through `{end_date}` (end date exclusive)
+- **Metric:** Unblended cost
+- **Total cost:** **{_money(service_total)} USD**
+- **Includes estimated charges:** {"Yes" if includes_estimates else "No"}
+
+## Top Services
+
+{_cost_table(services, ["Service"])}
+
+## Top Regions
+
+{_cost_table(regions, ["Region"])}
+
+## Top Service/Usage-Type Pairs
+
+{_cost_table(service_skus, ["Service", "Usage type"])}
+
+## Validation
+
+| Grouping | Calculated total |
+|---|---:|
+| Service | {_money(service_total)} |
+| Region | {_money(region_total)} |
+| Service / usage type | {_money(service_sku_total)} |
+
+## Data Limitations
+
+- Cost Explorer may mark recent charges as estimated; those values can change before invoicing.
+- Unblended costs may differ from amortized costs, credits, refunds, taxes, and the final invoice.
+- AWS Cost Explorer usage type is used as the SKU-level dimension.
+"""
+
+
+def build_overall_bill_report(
+    config: AwsToolConfig,
+    account_id: str,
+    start_date: str,
+    end_date: str,
+) -> str:
+    """Retrieve the three overall bill groupings and render one local Markdown report."""
+    service_data = fetch_cost_and_usage(config, start_date, end_date, "SERVICE")
+    region_data = fetch_cost_and_usage(config, start_date, end_date, "REGION")
+    service_sku_data = fetch_cost_and_usage(config, start_date, end_date, "SERVICE,USAGE_TYPE")
+    return render_overall_bill_report(
+        account_id,
+        start_date,
+        end_date,
+        service_data,
+        region_data,
+        service_sku_data,
+    )
 
 
 def create_billing_read_tools(config: AwsToolConfig) -> list[Any]:

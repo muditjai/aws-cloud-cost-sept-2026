@@ -8,7 +8,7 @@
 ## Bill reading
 
 - `get_bill_data`: reads monthly unblended Cost Explorer data grouped by requested dimensions.
-- Prompt: `bill_read/overall_bill_prompt.md`.
+- `bill_read/overall_bill_prompt.md` documents the deterministic local report contract; this stage does not contact OpenAI.
 
 ## Service/SKU cost analysis
 
