@@ -311,6 +311,82 @@ def fetch_elb_utilization(
     return strip_metadata(output)
 
 
+def _component_amount(components: dict[str, Any], usage_type: str) -> float:
+    return sum(
+        row["amount"]
+        for row in components.get("by_usage_type_and_operation", [])
+        if row.get("keys", [None])[0] == usage_type
+    )
+
+
+def fetch_elb_cost_attribution(
+    config: AwsToolConfig,
+    start_date: str,
+    end_date: str,
+) -> dict[str, Any]:
+    """Estimate variable ELB dollars per load balancer using reconciled billing metrics."""
+    components = fetch_elb_component_costs(config, start_date, end_date)
+    utilization = fetch_elb_utilization(config, start_date, end_date)
+    transfer_cost = _component_amount(components, "DataTransfer-Out-Bytes")
+    lcu_cost = _component_amount(components, "LCUUsage")
+
+    load_balancers = [
+        {"region": region, **load_balancer}
+        for region, regional_load_balancers in utilization.get("regions", {}).items()
+        for load_balancer in regional_load_balancers
+    ]
+    total_bytes = sum(
+        float(load_balancer.get("metrics", {}).get("ProcessedBytes", {}).get("value", 0))
+        for load_balancer in load_balancers
+    )
+    total_lcus = sum(
+        float(load_balancer.get("metrics", {}).get("ConsumedLCUs", {}).get("value", 0))
+        for load_balancer in load_balancers
+    )
+
+    attribution = []
+    for load_balancer in load_balancers:
+        metrics = load_balancer.get("metrics", {})
+        processed_bytes = float(metrics.get("ProcessedBytes", {}).get("value", 0))
+        consumed_lcus = float(metrics.get("ConsumedLCUs", {}).get("value", 0))
+        estimated_transfer_cost = transfer_cost * processed_bytes / total_bytes if total_bytes else 0
+        estimated_lcu_cost = lcu_cost * consumed_lcus / total_lcus if total_lcus else 0
+        attribution.append(
+            {
+                "name": load_balancer.get("name"),
+                "arn": load_balancer.get("arn"),
+                "type": load_balancer.get("type"),
+                "region": load_balancer.get("region"),
+                "processed_bytes": processed_bytes,
+                "consumed_lcu_metric_units": consumed_lcus,
+                "estimated_data_transfer_out_cost": estimated_transfer_cost,
+                "estimated_lcu_cost": estimated_lcu_cost,
+                "estimated_variable_cost": estimated_transfer_cost + estimated_lcu_cost,
+            }
+        )
+
+    attribution.sort(key=lambda item: item["estimated_variable_cost"], reverse=True)
+    return {
+        "exact_component_costs": {
+            "data_transfer_out": transfer_cost,
+            "application_lcu_usage": lcu_cost,
+        },
+        "metric_reconciliation": {
+            "processed_bytes": total_bytes,
+            "consumed_lcu_metric_units": total_lcus,
+            "implied_lcu_cost_per_unit": lcu_cost / total_lcus if total_lcus else None,
+        },
+        "per_load_balancer_estimates": attribution,
+        "unallocated_cost": components["total"] - transfer_cost - lcu_cost,
+        "limitations": [
+            "Data transfer allocation uses each load balancer's share of ProcessedBytes; it is not an invoice-level resource allocation.",
+            "LCU allocation uses each load balancer's ConsumedLCUs share and reconciles to the aggregate Cost Explorer LCU charge.",
+            "Hourly load-balancer charges and minor transfer components remain unallocated because resource-level Cost Explorer data is disabled.",
+        ],
+        "errors": utilization.get("errors", {}),
+    }
+
+
 def create_elb_analysis_tools(config: AwsToolConfig) -> list[Any]:
     """Create ELB-specific cost, inventory, and utilization tools."""
 
@@ -346,9 +422,18 @@ def create_elb_analysis_tools(config: AwsToolConfig) -> list[Any]:
         except (BotoCoreError, ClientError, ValueError) as error:
             return json_dumps({"ok": False, "error": client_error_message(error)})
 
+    @tool
+    def get_elb_cost_attribution(start_date: str, end_date: str) -> str:
+        """Estimate variable ELB cost by load balancer using billing metrics."""
+        try:
+            return json_dumps(fetch_elb_cost_attribution(config, start_date, end_date))
+        except (BotoCoreError, ClientError, ValueError) as error:
+            return json_dumps({"ok": False, "error": client_error_message(error)})
+
     return [
         get_elb_component_costs,
         get_elb_resource_costs,
         get_elb_inventory,
         get_elb_utilization,
+        get_elb_cost_attribution,
     ]

@@ -22,6 +22,7 @@
 - `get_elb_resource_costs`: attempts opt-in daily resource-level ELB costs for AWS's available 14-day window.
 - `get_elb_inventory`: lists Classic, Application, Network, and Gateway load balancers plus listeners, target groups, and targets in regions with ELB spend.
 - `get_elb_utilization`: reads per-load-balancer CloudWatch traffic and LCU billing metrics for explicitly estimated dollar attribution.
+- `get_elb_cost_attribution`: deterministically estimates transfer and LCU dollars per load balancer while leaving unsupported fixed-cost allocation explicit.
 - Prompt: `cost_analysis/elb_analysis_prompt.md`.
 
 ## Cost recommendations
