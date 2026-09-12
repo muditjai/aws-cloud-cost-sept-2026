@@ -25,6 +25,24 @@
 - `get_elb_cost_attribution`: deterministically estimates transfer and LCU dollars per load balancer while leaving unsupported fixed-cost allocation explicit.
 - Prompt: `cost_analysis/elb_analysis_prompt.md`.
 
+### Amazon RDS
+
+- `get_rds_component_costs`: returns exact RDS costs by usage type, operation, and region.
+- `get_rds_resource_costs`: attempts opt-in resource-level RDS costs.
+- `get_rds_inventory`: lists database instances, clusters, sizing, storage, and serverless settings.
+- `get_rds_utilization`: reads CPU, connection, memory, and Aurora Serverless capacity metrics.
+- `get_rds_cost_attribution`: estimates instance-class, GP3 storage, and Aurora Serverless v2 dollars by current DB instance.
+- Prompt: `cost_analysis/rds_analysis_prompt.md`.
+
+### Amazon CloudFront
+
+- `get_cloudfront_component_costs`: returns exact CloudFront costs by usage type, operation, and region.
+- `get_cloudfront_resource_costs`: attempts opt-in resource-level CloudFront costs.
+- `get_cloudfront_inventory`: lists distributions, origins, cache settings, compression, and price class.
+- `get_cloudfront_utilization`: reads requests, transfer, cache-hit, and error metrics by distribution.
+- `get_cloudfront_cost_attribution`: estimates request and transfer dollars by distribution using metric shares.
+- Prompt: `cost_analysis/cloudfront_analysis_prompt.md`.
+
 ## Cost recommendations
 
 - `get_ec2_rightsizing_recommendations`: reads EC2 rightsizing recommendations.

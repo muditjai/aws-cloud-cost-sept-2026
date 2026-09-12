@@ -25,9 +25,14 @@ aws_cloud_cost_agent/
     │   ├── aws_billing.py
     │   └── overall_bill_prompt.md
     ├── cost_analysis/
+    │   ├── cloudfront.py
+    │   ├── cloudfront_analysis_prompt.md
     │   ├── elb.py
     │   ├── elb_analysis_prompt.md
     │   ├── per_technology.py
+    │   ├── rds.py
+    │   ├── rds_analysis_prompt.md
+    │   ├── service_costs.py
     │   └── service_sku_analysis_prompt.md
     └── cost_recommendation/
         ├── per_technology_recommendations.py

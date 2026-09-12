@@ -1,14 +1,16 @@
 from __future__ import annotations
 
-from datetime import date
+from datetime import date, datetime, timezone
 from pathlib import Path
 
 from .agent import run_markdown_agent
 from .prompt_loader import load_prompt
 from .tools.auth.aws_auth import get_account_identity_data, render_connection_check
 from .tools.bill_read.aws_billing import build_overall_bill_report
+from .tools.cost_analysis.cloudfront import CLOUDFRONT_SERVICE
 from .tools.cost_analysis.elb import ELB_SERVICE
 from .tools.cost_analysis.per_technology import discover_top_service_skus
+from .tools.cost_analysis.rds import RDS_SERVICE
 from .tools.shared import AwsToolConfig, slug
 from .tools.tools_main import (
     recommendation_tools,
@@ -19,7 +21,14 @@ from .tools.tools_main import (
 def _write_artifact(output_dir: Path, filename: str, markdown: str) -> Path:
     output_dir.mkdir(parents=True, exist_ok=True)
     path = output_dir / filename
-    path.write_text(markdown.rstrip() + "\n", encoding="utf-8")
+    timestamp = datetime.now(timezone.utc).replace(microsecond=0).isoformat()
+    lines = markdown.rstrip().splitlines()
+    timestamp_line = f"**Analysis timestamp (UTC):** `{timestamp}`"
+    if lines and lines[0].startswith("# "):
+        lines = [lines[0], "", timestamp_line, "", *lines[1:]]
+    else:
+        lines = [timestamp_line, "", *lines]
+    path.write_text("\n".join(lines).rstrip() + "\n", encoding="utf-8")
     return path
 
 
@@ -88,11 +97,11 @@ async def run_workflow(
         artifact_suffix = f"{slug(service)}_{slug(sku)}_{start_date}_{end_date}.md"
 
         if "service-analysis" in steps:
-            prompt_name = (
-                "elb_analysis_prompt.md"
-                if service == ELB_SERVICE
-                else "service_sku_analysis_prompt.md"
-            )
+            prompt_name = {
+                ELB_SERVICE: "elb_analysis_prompt.md",
+                RDS_SERVICE: "rds_analysis_prompt.md",
+                CLOUDFRONT_SERVICE: "cloudfront_analysis_prompt.md",
+            }.get(service, "service_sku_analysis_prompt.md")
             prompt = load_prompt(
                 prompts / "cost_analysis" / prompt_name,
                 **values,
@@ -100,7 +109,7 @@ async def run_workflow(
             markdown = await run_markdown_agent(
                 f"AWS cost analysis: {service} / {sku}",
                 prompt,
-                service_analysis_tools(config),
+                service_analysis_tools(config, service),
             )
             artifacts.append(
                 _write_artifact(
