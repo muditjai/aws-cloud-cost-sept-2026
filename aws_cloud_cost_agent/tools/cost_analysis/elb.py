@@ -4,7 +4,7 @@ import json
 from datetime import date, datetime, time, timedelta, timezone
 from typing import Any
 
-from agents.decorators import tool
+from ..function_tool import tool
 from botocore.exceptions import BotoCoreError, ClientError
 
 from ..bill_read.aws_billing import fetch_cost_and_usage

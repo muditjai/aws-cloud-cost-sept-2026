@@ -3,7 +3,7 @@
 Account: `{account_id}`
 Billing period: `{start_date}` through `{end_date}` (end date is exclusive)
 
-This stage runs locally and does not invoke an OpenAI model.
+This stage runs locally and does not invoke the Respan API.
 
 1. Retrieve bill data grouped by service.
 2. Retrieve bill data grouped by region.

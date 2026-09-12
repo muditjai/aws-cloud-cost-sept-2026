@@ -3,12 +3,12 @@
 ## Authentication
 
 - `get_account_identity`: calls AWS STS to confirm the active account and IAM principal.
-- `auth/connection_check_prompt.md` documents the local report contract; this stage does not contact OpenAI.
+- `auth/connection_check_prompt.md` documents the local report contract; this stage does not contact Respan.
 
 ## Bill reading
 
 - `get_bill_data`: reads monthly unblended Cost Explorer data grouped by requested dimensions.
-- `bill_read/overall_bill_prompt.md` documents the deterministic local report contract; this stage does not contact OpenAI.
+- `bill_read/overall_bill_prompt.md` documents the deterministic local report contract; this stage does not contact Respan.
 
 ## Service/SKU cost analysis
 

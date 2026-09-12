@@ -4,14 +4,14 @@ These instructions apply to everything under this folder.
 
 ## Purpose
 
-This project is a standalone Python OpenAI Agents SDK workflow for AWS cloud cost analysis. It runs focused steps for connection validation, overall billing, service/SKU analysis, and recommendations.
+This project is a standalone Python workflow that uses the Respan OpenAI-compatible API for AWS cloud cost analysis. It runs focused steps for connection validation, overall billing, service/SKU analysis, and recommendations.
 
 The current implementation is read-only against AWS. It can call AWS Cost Explorer and STS APIs, but it must not mutate AWS resources.
 
 ## Safety Rules
 
 1. Do not add mutating AWS API calls unless the owner explicitly asks for a specific change path.
-2. Never commit AWS credentials, OpenAI keys, `.env*` files, credential exports, profiles, or generated reports containing account-sensitive data.
+2. Never commit AWS credentials, Respan keys, `.env*` files, credential exports, profiles, or generated reports containing account-sensitive data.
 3. Use read-only AWS IAM permissions for analysis runs.
 4. Treat estimates as decision support, not guaranteed savings. Include assumptions and validation checks.
 5. Keep `aws_cloud_cost_agent/tools/tools.md` aligned with implemented tools.

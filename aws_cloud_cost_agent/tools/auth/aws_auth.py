@@ -3,7 +3,7 @@ from __future__ import annotations
 from datetime import datetime, timezone
 from typing import Any
 
-from agents.decorators import tool
+from ..function_tool import tool
 from botocore.exceptions import BotoCoreError, ClientError
 
 from ..shared import AwsToolConfig, client_error_message, create_boto3_session, json_dumps
@@ -35,7 +35,7 @@ def render_connection_check(
 - **Authenticated account:** `{actual_account}`
 - **Principal ARN:** `{identity.get('Arn', 'Unknown')}`
 - **Principal user ID:** `{identity.get('UserId', 'Unknown')}`
-- **OpenAI contacted:** No
+- **Respan contacted:** No
 - **AWS changes made:** None
 """
 

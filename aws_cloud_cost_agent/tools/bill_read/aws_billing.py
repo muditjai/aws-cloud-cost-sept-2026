@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 from typing import Any
 
-from agents.decorators import tool
+from ..function_tool import tool
 from botocore.exceptions import BotoCoreError, ClientError
 
 from ..shared import (

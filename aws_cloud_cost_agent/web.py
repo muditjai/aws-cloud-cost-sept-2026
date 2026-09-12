@@ -192,8 +192,8 @@ class CostAgentHandler(BaseHTTPRequestHandler):
         invalid_steps = [step for step in steps if step not in AVAILABLE_STEPS]
         if invalid_steps:
             raise ValueError(f"Unsupported steps: {', '.join(invalid_steps)}")
-        if MODEL_STEPS.intersection(steps) and not os.getenv("OPENAI_API_KEY"):
-            raise ValueError("OPENAI_API_KEY is required for analysis and recommendations.")
+        if MODEL_STEPS.intersection(steps) and not os.getenv("RESPAN_API_KEY"):
+            raise ValueError("RESPAN_API_KEY is required for analysis and recommendations.")
         return account_id, start_value, end_value, steps
 
     def _serve_index(

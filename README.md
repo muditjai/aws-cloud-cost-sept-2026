@@ -1,6 +1,6 @@
 # AWS Cloud Cost Agent
 
-A small Python OpenAI Agents SDK workflow for reading AWS billing data, analyzing top service/SKU cost drivers, and producing cost recommendations.
+A small Python agent using Respan's OpenAI-compatible API to read AWS billing data, analyze top service/SKU cost drivers, and produce cost recommendations.
 
 The agent is read-only. It does not modify AWS resources.
 
@@ -60,12 +60,12 @@ AWS_SECRET_ACCESS_KEY=<aws-secret-access-key>
 AWS_REGION=us-east-1
 ```
 
-`OPENAI_API_KEY` is required for service analysis and recommendation steps. The
+`RESPAN_API_KEY` is required for service analysis and recommendation steps. The
 `connection-check` and `overall-bill` steps query AWS and calculate their reports
-locally without contacting OpenAI.
+locally without contacting Respan.
 
 ```bash
-OPENAI_API_KEY=<openai-api-key>
+RESPAN_API_KEY=<respan-api-key>
 ```
 
 Optional values:
@@ -75,6 +75,11 @@ AWS_SESSION_TOKEN=<temporary-session-token>
 AWS_PROFILE=<aws-profile-name>
 AWS_ACCOUNT_ID=<expected-account-id>
 ```
+
+The Respan integration uses the OpenAI-compatible Chat Completions function-call
+format at `https://api.respan.ai/api/` with model `gpt-5.4`. It does not currently
+expose a web-search tool, so recommendation reports must not claim current web
+research.
 
 ## CLI
 
@@ -110,7 +115,7 @@ aws-cloud-cost-web
 ```
 
 Then open `http://127.0.0.1:8765`. The page runs selected workflow steps in the
-background and renders Markdown files from `output_artifact/`. AWS and OpenAI
+background and renders Markdown files from `output_artifact/`. AWS and Respan
 credentials remain server-side and are never included in the page.
 
 ## Output
