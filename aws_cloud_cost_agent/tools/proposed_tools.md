@@ -16,3 +16,13 @@ The agent appends missing AWS API capabilities here when the implemented tools c
 
 - Reason: The available service breakdown identifies public IPv4 charges by operation and region but cannot map individual addresses to resources, allocation state, lifecycle duration, or owner tags.
 - AWS APIs: EC2 DescribeAddresses, EC2 DescribeNetworkInterfaces, EC2 DescribeInstances, EC2 DescribeNatGateways, EC2 DescribeVpcEndpoints, EC2 DescribeSubnets, EC2 DescribeRouteTables, Resource Groups Tagging API GetResources
+
+## get_cloudwatch_metric_inventory
+
+- Reason: Identify specific namespaces, S3 request-metric filters, and Elastic Beanstalk environments generating CW:MetricMonitorUsage charges.
+- AWS APIs: CloudWatch ListMetrics, CloudWatch GetMetricData, S3 ListBucketMetricsConfigurations, Elastic Beanstalk DescribeEnvironmentHealth
+
+## get_s3_inventory_and_utilization
+
+- Reason: Attribute S3 data-transfer spend to buckets and inspect region, public access, CloudFront origins, request metrics, and Storage Lens configuration.
+- AWS APIs: S3 ListBuckets, S3 GetBucketLocation, S3 GetBucketPolicy, S3 GetBucketTagging, S3 ListBucketMetricsConfigurations, S3 ListStorageLensConfigurations, CloudWatch GetMetricData
