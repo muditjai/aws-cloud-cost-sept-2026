@@ -2,8 +2,8 @@
 
 ## Authentication
 
-- `get_account_identity`: confirms the active AWS account and IAM principal.
-- Prompt: `auth/connection_check_prompt.md`.
+- `get_account_identity`: calls AWS STS to confirm the active account and IAM principal.
+- `auth/connection_check_prompt.md` documents the local report contract; this stage does not contact OpenAI.
 
 ## Bill reading
 

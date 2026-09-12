@@ -83,8 +83,9 @@ async def async_main(argv: list[str] | None = None) -> int:
     load_local_env(PROJECT_ROOT / ".env")
     options = parse_args(argv)
 
-    if not os.getenv("OPENAI_API_KEY"):
-        raise RuntimeError("OPENAI_API_KEY is required.")
+    model_steps = set(options.steps) - {"connection-check"}
+    if model_steps and not os.getenv("OPENAI_API_KEY"):
+        raise RuntimeError("OPENAI_API_KEY is required for billing analysis and recommendations.")
 
     from .workflow import run_workflow
 

@@ -15,5 +15,8 @@ dependencies = [
 [project.scripts]
 aws-cloud-cost-agent = "aws_cloud_cost_agent.cli:main"
 
+[tool.setuptools.packages.find]
+include = ["aws_cloud_cost_agent*"]
+
 [tool.setuptools.package-data]
 "aws_cloud_cost_agent.tools" = ["*.md", "*/*.md"]

@@ -43,12 +43,19 @@ source .venv/bin/activate
 pip install -e .
 ```
 
-The CLI automatically loads a local `.env` file. Required values:
+The CLI automatically loads a local `.env` file. AWS credentials are required for every step:
 
 ```bash
 AWS_ACCESS_KEY_ID=<aws-access-key-id>
 AWS_SECRET_ACCESS_KEY=<aws-secret-access-key>
 AWS_REGION=us-east-1
+```
+
+`OPENAI_API_KEY` is required for billing analysis and recommendation steps. The
+`connection-check` step calls AWS STS and writes its report locally without
+contacting OpenAI.
+
+```bash
 OPENAI_API_KEY=<openai-api-key>
 ```
 

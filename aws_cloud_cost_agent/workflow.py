@@ -5,11 +5,10 @@ from pathlib import Path
 
 from .agent import run_markdown_agent
 from .prompt_loader import load_prompt
-from .tools.auth.aws_auth import get_account_identity_data
+from .tools.auth.aws_auth import get_account_identity_data, render_connection_check
 from .tools.cost_analysis.per_technology import discover_top_service_skus
 from .tools.shared import AwsToolConfig, slug
 from .tools.tools_main import (
-    connection_tools,
     overall_bill_tools,
     recommendation_tools,
     service_analysis_tools,
@@ -41,11 +40,6 @@ async def run_workflow(
     identity = get_account_identity_data(config)
     actual_account = identity["Account"]
 
-    if expected_account and expected_account != actual_account:
-        raise RuntimeError(
-            f"AWS account mismatch: expected {expected_account}, credentials belong to {actual_account}."
-        )
-
     prompts = config.tools_dir
     common = {
         "account_id": actual_account,
@@ -55,14 +49,18 @@ async def run_workflow(
     artifacts: list[Path] = []
 
     if "connection-check" in steps:
-        prompt = load_prompt(prompts / "auth" / "connection_check_prompt.md", **common)
-        markdown = await run_markdown_agent("AWS connection check", prompt, connection_tools(config))
+        markdown = render_connection_check(identity, expected_account, config.region)
         artifacts.append(
             _write_artifact(
                 config.output_dir,
                 f"connection_check_{date.today().isoformat()}.md",
                 markdown,
             )
+        )
+
+    if expected_account and expected_account != actual_account:
+        raise RuntimeError(
+            f"AWS account mismatch: expected {expected_account}, credentials belong to {actual_account}."
         )
 
     if "overall-bill" in steps:
