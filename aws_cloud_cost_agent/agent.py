@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from agents import Agent, WebSearchTool
 
-from .aws_tools import AwsToolConfig, create_aws_tools
+from .tools.tools_main import AwsToolConfig, create_aws_tools
 
 
 BASE_INSTRUCTIONS = """
@@ -11,12 +11,12 @@ You are an AWS cloud cost optimization agent for Migracle.
 Your job is to inspect AWS billing data, identify realistic cost-reduction opportunities, spawn specialist analysis for the largest services/SKUs, and produce Markdown assessment artifacts.
 
 Required workflow:
-1. Read tools.md first with read_tools_registry and only use the implemented tools listed there.
+1. Read tools/tools.md first with read_tools_registry and only use the implemented tools listed there.
 2. Identify the AWS account with get_account_identity.
 3. Make exploratory AWS Billing and Cost Explorer API calls through the available tools.
 4. Use get_top_cost_drivers to identify the largest account-level cost drivers.
 5. For each top service/SKU driver requested by the run prompt, spawn the service specialist sub-agent with analyze_service_cost_driver.
-6. For missing AWS data or missing action capability, use web search to research the relevant AWS API and then call record_proposed_tool so proposed_tools.md captures the missing tool.
+6. For missing AWS data or missing action capability, use web search to research the relevant AWS API and then call record_proposed_tool so tools/proposed_tools.md captures the missing tool.
 7. Write account-level and service-level Markdown reports into the assessment folder with write_assessment_file.
 8. For every optimization action you are considering, call stage_change_plan so optmization_script/considered_actions.py contains the proposed code-level action list.
 9. Do not claim that an AWS resource was changed unless a mutating tool explicitly reports success.

@@ -10,7 +10,7 @@ from pathlib import Path
 from agents import Runner
 
 from .agent import create_cost_agent
-from .aws_tools import AwsToolConfig, prepare_output_dirs
+from .tools.tools_main import AwsToolConfig, prepare_output_dirs
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -87,7 +87,7 @@ def parse_args(argv: list[str] | None = None) -> CliOptions:
     parser.add_argument("--region", default=os.getenv("AWS_REGION", "us-east-1"), help="AWS API region.")
     parser.add_argument("--max-pages", type=int, default=4, help="Maximum paginated pages per tool call.")
     parser.add_argument("--top-drivers", type=int, default=5, help="Number of top drivers to send to service sub-agents.")
-    parser.add_argument("--project-root", type=Path, default=PROJECT_ROOT, help="Project root for tools.md and artifacts.")
+    parser.add_argument("--project-root", type=Path, default=PROJECT_ROOT, help="Project root for tools/tools.md and artifacts.")
     parser.add_argument("--assessment-dir", type=Path, default=Path("assessment"), help="Markdown assessment output folder.")
     parser.add_argument(
         "--optimization-script-dir",
@@ -179,7 +179,7 @@ Required tool usage:
 8. Call AWS-native recommendation tools where relevant.
 9. Spawn analyze_service_cost_driver once for each of the top {options.top_drivers} service/SKU drivers.
 10. Write assessment/total-cost.md and one service/SKU Markdown file per specialist result with write_assessment_file.
-11. If tools.md lacks a tool needed for deeper analysis, use web search to identify the AWS API and call record_proposed_tool.
+11. If tools/tools.md lacks a tool needed for deeper analysis, use web search to identify the AWS API and call record_proposed_tool.
 12. Use stage_change_plan for every optimization action you are considering, even if it needs human approval.
 
 Do not include AWS access keys, secrets, tokens, or credential material in any prompt output or artifact.

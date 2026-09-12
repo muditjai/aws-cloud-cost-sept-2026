@@ -1,16 +1,26 @@
 # AWS Cloud Cost Agent Tools
 
-This file is the source-of-truth registry for tools the agent is allowed to use. If a needed capability is missing, the agent should use web search to identify the AWS API and append a proposal to `proposed_tools.md`.
+This file is the source-of-truth registry for tools the agent is allowed to use. If a needed capability is missing, the agent should use web search to identify the AWS API and append a proposal to `tools/proposed_tools.md`.
 
-## Discovery And Cost Tools
+## Tool Aggregator
 
-### `read_tools_registry`
+### `aws_cloud_cost_agent/tools/tools_main.py`
 
-Reads this file before the agent makes AWS API calls.
+Imports and assembles all implemented tool groups:
+
+- `auth/aws_auth.py`
+- `bill_read/aws_billing.py`
+- `cost_analysis/per_technology.py`
+- `cost_recommendation/per_technology_recommendations.py`
+- `artifacts/assessment_artifacts.py`
+
+## `auth/`
 
 ### `get_account_identity`
 
 Calls `sts:GetCallerIdentity` to confirm which AWS account and principal the run is analyzing.
+
+## `bill_read/`
 
 ### `get_cost_and_usage`
 
@@ -24,6 +34,24 @@ Inputs:
 - `metrics_csv`: Comma-separated Cost Explorer metrics.
 - `group_by_csv`: Comma-separated dimensions such as `SERVICE`, `REGION`, `USAGE_TYPE`, or `OPERATION`.
 - `filter_json`: Optional Cost Explorer Expression JSON.
+
+### `get_cost_forecast`
+
+Calls `ce:GetCostForecast` for a future period.
+
+## `cost_analysis/`
+
+### `get_known_technology_service_hints`
+
+Returns known mappings from technology names to AWS Cost Explorer `SERVICE` values.
+
+Initial technology coverage:
+
+- CDN / CloudFront
+- EC2
+- ELB
+- S3
+- VPC
 
 ### `get_top_cost_drivers`
 
@@ -41,9 +69,7 @@ Calls `ce:GetCostAndUsage` with a `SERVICE` filter and ranks the service by usag
 
 Default grouping is `USAGE_TYPE,OPERATION`, which is the closest Cost Explorer approximation to SKU-level cost detail available in the current tool set.
 
-### `get_cost_forecast`
-
-Calls `ce:GetCostForecast` for a future period.
+## `cost_recommendation/`
 
 ### `get_rightsizing_recommendations`
 
@@ -57,7 +83,11 @@ Calls `ce:GetSavingsPlansPurchaseRecommendation` for commitment discount opportu
 
 Calls `ce:GetReservationPurchaseRecommendation` for Reserved Instance opportunities.
 
-## Artifact Tools
+## `artifacts/`
+
+### `read_tools_registry`
+
+Reads `tools/tools.md` before the agent makes AWS API calls.
 
 ### `write_assessment_file`
 
@@ -69,7 +99,7 @@ Writes Markdown under the `assessment/` folder. The agent should write:
 
 ### `record_proposed_tool`
 
-Appends missing tool proposals to `proposed_tools.md`. Use this after web search when Cost Explorer is insufficient for a service-specific diagnosis.
+Appends missing tool proposals to `tools/proposed_tools.md`. Use this after web search when Cost Explorer is insufficient for a service-specific diagnosis.
 
 ### `stage_change_plan`
 

@@ -7,11 +7,11 @@ Standalone Python OpenAI Agents SDK project for AWS cost analysis. It calls AWS 
 - Reads AWS account identity with STS.
 - Accepts AWS access key credentials directly or through the standard AWS SDK credential chain.
 - Reads historical AWS spend with Cost Explorer.
-- Reads `tools.md` before making exploratory AWS calls.
+- Reads `tools/tools.md` before making exploratory AWS calls.
 - Groups spend by service, service/SKU approximation, region, linked account, usage type, operation, purchase type, instance type, or availability zone.
 - Fetches AWS forecast data.
 - Fetches EC2 rightsizing, Savings Plans, and Reserved Instance purchase recommendations where available.
-- Uses web search and writes missing tool proposals to `proposed_tools.md` when the available tools are insufficient.
+- Uses web search and writes missing tool proposals to `tools/proposed_tools.md` when the available tools are insufficient.
 - Spawns a service/SKU specialist sub-agent for each selected top cost driver.
 - Produces Markdown assessment files under `assessment/`.
 - Stages proposed change plans for review in `optmization_script/considered_actions.py`.
@@ -141,7 +141,30 @@ assessment/
 optmization_script/
 └── considered_actions.py
 
-proposed_tools.md
+tools/
+└── proposed_tools.md
+```
+
+Tool implementation layout:
+
+```text
+aws_cloud_cost_agent/tools/
+├── tools_main.py
+├── shared.py
+├── auth/
+│   └── aws_auth.py
+├── bill_read/
+│   └── aws_billing.py
+├── cost_analysis/
+│   └── per_technology.py
+├── cost_recommendation/
+│   └── per_technology_recommendations.py
+└── artifacts/
+    └── assessment_artifacts.py
+
+tools/
+├── tools.md
+└── proposed_tools.md
 ```
 
 Show all CLI options:

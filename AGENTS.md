@@ -19,9 +19,9 @@ The current implementation is read-only against AWS. It can call AWS Cost Explor
 3. Never commit AWS credentials, OpenAI keys, `.env*` files, credential exports, profiles, or generated reports containing account-sensitive data.
 4. Prefer read-only AWS IAM permissions for analysis runs. Add narrow service-specific write permissions only when implementing an approved mutating tool.
 5. Treat dollar amounts and forecasts as decision support, not guaranteed savings. Include assumptions and validation checks in recommendations.
-6. Keep `tools.md` aligned with implemented tools. If the agent needs an unavailable AWS API, it must propose it in `proposed_tools.md`.
+6. Keep `tools/tools.md` aligned with implemented tools. If the agent needs an unavailable AWS API, it must propose it in `tools/proposed_tools.md`.
 7. Generated Markdown assessments belong under `assessment/`.
-8. Candidate change actions belong under `optimization_script/considered_actions.py`. 
+8. Candidate change actions belong under `optmization_script/considered_actions.py`. Keep this folder spelling because it is part of the requested interface.
 
 ## Code Conventions
 
