@@ -9,6 +9,8 @@ The agent is read-only. It does not modify AWS resources.
 ```text
 aws_cloud_cost_agent/
 ├── cli.py
+├── web.py
+├── web_assets/
 ├── steps.py
 ├── workflow.py
 ├── agent.py
@@ -93,6 +95,18 @@ Available steps:
 - `overall-bill`
 - `service-analysis`
 - `recommendations`
+
+## Local web interface
+
+Start the localhost-only wrapper:
+
+```bash
+aws-cloud-cost-web
+```
+
+Then open `http://127.0.0.1:8765`. The page runs selected workflow steps in the
+background and displays Markdown files from `output_artifact/`. AWS and OpenAI
+credentials remain server-side and are never included in the page.
 
 ## Output
 

@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>AWS Cost Agent</title>
+    <link rel="stylesheet" href="/assets/styles.css">
+    <script src="/assets/app.js" defer></script>
+  </head>
+  <body>
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">Local console</p>
+        <h1>AWS Cost Agent</h1>
+      </div>
+      <div class="run-status $status_class" id="run-status" data-run-id="$run_id">
+        <span class="status-dot" aria-hidden="true"></span>
+        <span>$status_text</span>
+      </div>
+    </header>
+
+    $error_message
+
+    <main class="workspace">
+      <aside class="controls">
+        <form action="/runs" method="post" id="run-form">
+          <input type="hidden" name="csrf_token" value="$csrf_token">
+
+          <div class="section-heading">
+            <h2>New run</h2>
+          </div>
+
+          <label for="aws-account">AWS account</label>
+          <input
+            id="aws-account"
+            name="aws_account"
+            type="text"
+            value="$account_id"
+            inputmode="numeric"
+            pattern="[0-9]{12}"
+            maxlength="12"
+            autocomplete="off"
+            placeholder="12-digit account ID"
+          >
+
+          <div class="date-grid">
+            <div>
+              <label for="start-date">Start date</label>
+              <input id="start-date" name="start_date" type="date" value="$start_date" required>
+            </div>
+            <div>
+              <label for="end-date">End date</label>
+              <input id="end-date" name="end_date" type="date" value="$end_date" required>
+            </div>
+          </div>
+
+          <fieldset>
+            <legend>Steps</legend>
+            <label class="step-option">
+              <input type="checkbox" name="steps" value="connection-check" checked>
+              <span><strong>Connection check</strong><small>Local AWS STS</small></span>
+            </label>
+            <label class="step-option">
+              <input type="checkbox" name="steps" value="overall-bill">
+              <span><strong>Overall bill</strong><small>Local Cost Explorer</small></span>
+            </label>
+            <label class="step-option">
+              <input type="checkbox" name="steps" value="service-analysis">
+              <span><strong>Service / SKU analysis</strong><small>AWS data sent to OpenAI</small></span>
+            </label>
+            <label class="step-option">
+              <input type="checkbox" name="steps" value="recommendations">
+              <span><strong>Recommendations</strong><small>OpenAI and web search</small></span>
+            </label>
+          </fieldset>
+
+          <button type="submit" id="run-button">Run selected steps</button>
+        </form>
+
+        <section class="artifact-nav" aria-labelledby="artifact-list-heading">
+          <div class="section-heading">
+            <h2 id="artifact-list-heading">Artifacts</h2>
+          </div>
+          <ul>$artifact_items</ul>
+        </section>
+      </aside>
+
+      <section class="artifact-viewer" aria-live="polite">
+        $artifact_viewer
+      </section>
+    </main>
+  </body>
+</html>
