@@ -29,10 +29,13 @@ class ArtifactGroupingTests(unittest.TestCase):
         self.assertEqual(
             grouped["Per Service Analysis"],
             [
-                Path("recommendations_amazon_rds.md"),
                 Path("service_sku_analysis_amazon_rds.md"),
                 Path("legacy_service_report.md"),
             ],
+        )
+        self.assertEqual(
+            grouped["Recommendations"],
+            [Path("recommendations_amazon_rds.md")],
         )
 
 

@@ -33,6 +33,7 @@ ARTIFACT_GROUPS = (
     "Connection Check",
     "Overall Bill",
     "Per Service Analysis",
+    "Recommendations",
 )
 
 
@@ -44,6 +45,8 @@ def _group_artifacts(artifacts: list[Path]) -> dict[str, list[Path]]:
             group = "Connection Check"
         elif path.name.startswith("overall_bill_data_"):
             group = "Overall Bill"
+        elif path.name.startswith("recommendations_"):
+            group = "Recommendations"
         else:
             group = "Per Service Analysis"
         grouped[group].append(path)
