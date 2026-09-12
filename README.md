@@ -1,71 +1,111 @@
-# AWS Cloud Cost Agent - September 2026
+# AWS Cloud Cost Agent
 
-Standalone Python OpenAI Agents SDK project for AWS cost analysis. It calls AWS APIs, summarizes spend, spawns specialist sub-agents for top service/SKU drivers, proposes optimization ideas, and leaves a controlled path for future approved remediation tools.
+A small Python OpenAI Agents SDK workflow for reading AWS billing data, analyzing top service/SKU cost drivers, and producing cost recommendations.
 
-## Current Behavior
+The agent is read-only. It does not modify AWS resources.
 
-- Reads AWS account identity with STS.
-- Accepts AWS access key credentials directly or through the standard AWS SDK credential chain.
-- Reads historical AWS spend with Cost Explorer.
-- Reads `tools/tools.md` before making exploratory AWS calls.
-- Groups spend by service, service/SKU approximation, region, linked account, usage type, operation, purchase type, instance type, or availability zone.
-- Fetches AWS forecast data.
-- Fetches EC2 rightsizing, Savings Plans, and Reserved Instance purchase recommendations where available.
-- Uses web search and writes missing tool proposals to `tools/proposed_tools.md` when the available tools are insufficient.
-- Spawns a service/SKU specialist sub-agent for each selected top cost driver.
-- Produces Markdown assessment files under `assessment/`.
-- Stages proposed change plans for review in `optmization_script/considered_actions.py`.
-- Does not mutate AWS resources.
+## Structure
 
-## Dependencies
+```text
+aws_cloud_cost_agent/
+├── cli.py
+├── steps.py
+├── workflow.py
+├── agent.py
+└── tools/
+    ├── tools_main.py
+    ├── tools.md
+    ├── proposed_tools.md
+    ├── auth/
+    │   ├── aws_auth.py
+    │   └── connection_check_prompt.md
+    ├── bill_read/
+    │   ├── aws_billing.py
+    │   └── overall_bill_prompt.md
+    ├── cost_analysis/
+    │   ├── per_technology.py
+    │   └── service_sku_analysis_prompt.md
+    └── cost_recommendation/
+        ├── per_technology_recommendations.py
+        └── service_sku_recommendation_prompt.md
 
-- `openai-agents`: OpenAI Agents SDK runtime.
-- `boto3`: AWS SDK for Python.
+output_artifact/
+```
 
-These are intentionally scoped to agent orchestration and read-only AWS cost discovery.
+`tools_main.py` imports each tool group. Every workflow step has one prompt beside its Python tools. The service analysis and recommendation prompts are rendered and run separately for each of the five highest-cost service/SKU pairs.
 
 ## Setup
 
 ```bash
 cd /home/muditjai/src/aws-cloud-cost-sept-2026
-python -m venv .venv
+python3 -m venv .venv
 source .venv/bin/activate
 pip install -e .
 ```
 
-Required environment:
+The CLI automatically loads a local `.env` file. Required values:
 
 ```bash
-export OPENAI_API_KEY=<openai-api-key>
+AWS_ACCESS_KEY_ID=<aws-access-key-id>
+AWS_SECRET_ACCESS_KEY=<aws-secret-access-key>
+AWS_REGION=us-east-1
+OPENAI_API_KEY=<openai-api-key>
 ```
 
-AWS credentials can be supplied either through environment variables:
+Optional values:
 
 ```bash
-export AWS_ACCESS_KEY_ID=<aws-access-key-id>
-export AWS_SECRET_ACCESS_KEY=<aws-secret-access-key>
-export AWS_SESSION_TOKEN=<optional-session-token>
+AWS_SESSION_TOKEN=<temporary-session-token>
+AWS_PROFILE=<aws-profile-name>
+AWS_ACCOUNT_ID=<expected-account-id>
 ```
 
-or through the default AWS SDK credential chain:
+## CLI
+
+The CLI intentionally exposes only account, date, and step selection:
 
 ```bash
-export AWS_PROFILE=<aws-profile-name>
+python3 -m aws_cloud_cost_agent \
+  --aws-account 472186642949 \
+  --start-date 2026-08-01 \
+  --end-date 2026-09-01 \
+  --steps connection-check overall-bill service-analysis recommendations
 ```
 
-Environment variables are usually safer than passing secrets as CLI args because shell history may capture CLI args.
-
-Optional environment:
+Running without arguments executes every step for the last 30 days:
 
 ```bash
-export OPENAI_MODEL=<model-name>
+python3 -m aws_cloud_cost_agent
 ```
 
-If `OPENAI_MODEL` is unset, the OpenAI Agents SDK default model is used.
+Available steps:
 
-## IAM Permissions
+- `connection-check`
+- `overall-bill`
+- `service-analysis`
+- `recommendations`
 
-Use read-only permissions for analysis:
+## Output
+
+Each selected step writes Markdown under `output_artifact/`:
+
+```text
+output_artifact/
+├── connection_check_2026-09-12.md
+├── overall_bill_data_2026-08-13_2026-09-12.md
+├── service_sku_analysis_<service>_<sku>_<start>_<end>.md
+└── recommendations_<service>_<sku>_<start>_<end>.md
+```
+
+The analysis and recommendation steps produce one file per top service/SKU pair. Recommendation files show before state, proposed after state, estimated savings, validation, rollback, and approval requirements.
+
+## Tool registry
+
+[tools.md](aws_cloud_cost_agent/tools/tools.md) lists implemented tools. When an agent needs an unavailable AWS API, it records the missing capability in [proposed_tools.md](aws_cloud_cost_agent/tools/proposed_tools.md).
+
+## IAM permissions
+
+Use read-only access:
 
 ```json
 {
@@ -75,11 +115,8 @@ Use read-only permissions for analysis:
       "Effect": "Allow",
       "Action": [
         "ce:GetCostAndUsage",
-        "ce:GetCostForecast",
-        "ce:GetDimensionValues",
         "ce:GetRightsizingRecommendation",
         "ce:GetSavingsPlansPurchaseRecommendation",
-        "ce:GetReservationPurchaseRecommendation",
         "sts:GetCallerIdentity"
       ],
       "Resource": "*"
@@ -87,102 +124,3 @@ Use read-only permissions for analysis:
   ]
 }
 ```
-
-Do not grant write permissions until a specific mutating tool is implemented, reviewed, and approved.
-
-## Usage
-
-Analyze the last 30 days:
-
-```bash
-python -m aws_cloud_cost_agent
-```
-
-Analyze with explicit access key credentials:
-
-```bash
-python -m aws_cloud_cost_agent \
-  --aws-access-key-id <aws-access-key-id> \
-  --aws-secret-access-key <aws-secret-access-key>
-```
-
-Analyze a specific period:
-
-```bash
-python -m aws_cloud_cost_agent --start 2026-09-01 --end 2026-10-01
-```
-
-Group by a different Cost Explorer dimension:
-
-```bash
-python -m aws_cloud_cost_agent --group-by REGION
-```
-
-Write the final report to a local markdown file:
-
-```bash
-python -m aws_cloud_cost_agent --out reports/aws-cost-review.md
-```
-
-Analyze more or fewer top drivers with service/SKU specialist sub-agents:
-
-```bash
-python -m aws_cloud_cost_agent --top-drivers 8
-```
-
-Default generated artifacts:
-
-```text
-assessment/
-├── final-report.md
-├── total-cost.md
-└── <service-or-sku>.md
-
-optmization_script/
-└── considered_actions.py
-
-tools/
-└── proposed_tools.md
-```
-
-Tool implementation layout:
-
-```text
-aws_cloud_cost_agent/tools/
-├── tools_main.py
-├── shared.py
-├── auth/
-│   └── aws_auth.py
-├── bill_read/
-│   └── aws_billing.py
-├── cost_analysis/
-│   └── per_technology.py
-├── cost_recommendation/
-│   └── per_technology_recommendations.py
-└── artifacts/
-    └── assessment_artifacts.py
-
-tools/
-├── tools.md
-└── proposed_tools.md
-```
-
-Show all CLI options:
-
-```bash
-python -m aws_cloud_cost_agent --help
-```
-
-## Future Remediation Path
-
-Future AWS mutations should be implemented as narrow service-specific tools. Each tool should require:
-
-- A prior report recommendation ID.
-- Exact account, region, service, and resource IDs.
-- An expected savings estimate.
-- A validation plan.
-- A rollback plan.
-- `--apply`.
-- `AWS_COST_AGENT_ENABLE_MUTATIONS=true`.
-
-The default agent prompt must continue to prefer recommendations and staged change plans over automatic execution.

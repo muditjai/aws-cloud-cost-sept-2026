@@ -16,4 +16,6 @@ venv/
 
 # Generated outputs
 reports/
+output_artifact/*.md
+!output_artifact/.gitkeep
 *.log
