@@ -18,6 +18,7 @@ from typing import Any
 from urllib.parse import parse_qs, quote, unquote, urlsplit
 
 from .cli import PROJECT_ROOT, load_local_env
+from .markdown_renderer import render_markdown
 from .steps import AVAILABLE_STEPS
 from .tools.shared import AwsToolConfig
 from .workflow import run_workflow
@@ -216,13 +217,13 @@ class CostAgentHandler(BaseHTTPRequestHandler):
             )
 
         if selected:
-            markdown = html.escape(selected.read_text(encoding="utf-8"))
+            markdown = render_markdown(selected.read_text(encoding="utf-8"))
             viewer = (
                 '<div class="viewer-heading">'
                 f'<h2>{html.escape(selected.name)}</h2>'
                 f'<a href="/artifacts/{quote(selected.name)}" target="_blank" '
                 'rel="noopener">Open raw</a></div>'
-                f'<pre class="markdown-output">{markdown}</pre>'
+                f'<article class="markdown-output">{markdown}</article>'
             )
         else:
             viewer = '<div class="empty-state">No Markdown artifacts yet.</div>'

@@ -9,6 +9,7 @@ description = "OpenAI Agents SDK project for read-only AWS cloud cost analysis a
 requires-python = ">=3.11"
 dependencies = [
   "boto3>=1.34.0",
+  "Markdown>=3.7,<4",
   "openai-agents"
 ]
 

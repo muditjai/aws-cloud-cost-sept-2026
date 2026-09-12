@@ -105,7 +105,7 @@ aws-cloud-cost-web
 ```
 
 Then open `http://127.0.0.1:8765`. The page runs selected workflow steps in the
-background and displays Markdown files from `output_artifact/`. AWS and OpenAI
+background and renders Markdown files from `output_artifact/`. AWS and OpenAI
 credentials remain server-side and are never included in the page.
 
 ## Output
