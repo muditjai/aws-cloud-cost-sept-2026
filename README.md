@@ -77,9 +77,9 @@ AWS_ACCOUNT_ID=<expected-account-id>
 ```
 
 The Respan integration uses the OpenAI-compatible Chat Completions function-call
-format at `https://api.respan.ai/api/` with model `gemini/gemini-3.7-flash`. It
-does not currently expose a web-search tool, so recommendation reports must not
-claim current web research.
+format at `https://api.respan.ai/api/` with model `openai/gpt-6-astra`. It does
+not currently expose a web-search tool, so recommendation reports must not claim
+current web research.
 
 ## CLI
 
