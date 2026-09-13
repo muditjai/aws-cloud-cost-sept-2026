@@ -10,7 +10,7 @@ from .tools.function_tool import FunctionTool
 
 
 RESPAN_BASE_URL = "https://api.respan.ai/api/"
-RESPAN_MODEL = "openai/gpt-6-astra"
+RESPAN_MODEL = "zai/glm-5.3"
 MAX_TOOL_ROUNDS = 20
 
 
