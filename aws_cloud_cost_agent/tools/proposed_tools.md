@@ -14,7 +14,7 @@ The agent appends missing AWS API capabilities here when the implemented tools c
 
 ## get_public_ipv4_resource_inventory_and_usage
 
-- Reason: The available service breakdown identifies public IPv4 charges by operation and region but cannot map individual addresses to resources, allocation state, lifecycle duration, or owner tags.
+- Reason: Map Elastic IPs, auto-assigned public IPs, NAT Gateways, and service-managed network interfaces to resources, allocation state, lifecycle duration, and owner tags.
 - AWS APIs: EC2 DescribeAddresses, EC2 DescribeNetworkInterfaces, EC2 DescribeInstances, EC2 DescribeNatGateways, EC2 DescribeVpcEndpoints, EC2 DescribeSubnets, EC2 DescribeRouteTables, Resource Groups Tagging API GetResources
 
 ## get_cloudwatch_metric_inventory
