@@ -73,28 +73,42 @@ h2 {
 }
 
 .status-dot {
-  width: 9px;
-  height: 9px;
-  flex: 0 0 9px;
+  width: 12px;
+  height: 12px;
+  flex: 0 0 12px;
+  border: 2px solid #9ba59f;
   border-radius: 50%;
   background: #9ba59f;
 }
 
 .status-running .status-dot {
-  background: #e2b844;
-  animation: pulse 1.2s ease-in-out infinite;
+  width: 14px;
+  height: 14px;
+  flex-basis: 14px;
+  background: transparent;
+  border-color: rgba(226, 184, 68, 0.32);
+  border-top-color: #e2b844;
+  animation: status-spin 0.75s linear infinite;
 }
 
 .status-complete .status-dot {
+  border-color: #4fb477;
   background: #4fb477;
 }
 
 .status-failed .status-dot {
+  border-color: #df695f;
   background: #df695f;
 }
 
-@keyframes pulse {
-  50% { opacity: 0.35; }
+@keyframes status-spin {
+  to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .status-running .status-dot {
+    animation: none;
+  }
 }
 
 .error-banner {
