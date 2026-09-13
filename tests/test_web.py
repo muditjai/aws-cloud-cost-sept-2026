@@ -3,7 +3,7 @@ from __future__ import annotations
 import unittest
 from pathlib import Path
 
-from aws_cloud_cost_agent.web import _group_artifacts
+from aws_cloud_cost_agent.web import CostAgentHandler, _group_artifacts
 
 
 class ArtifactGroupingTests(unittest.TestCase):
@@ -37,6 +37,19 @@ class ArtifactGroupingTests(unittest.TestCase):
             grouped["Recommendations"],
             [Path("recommendations_amazon_rds.md")],
         )
+
+    def test_web_run_accepts_respan_model(self) -> None:
+        form = {
+            "aws_account": ["472186642949"],
+            "respan_model": ["zai/glm-5.3"],
+            "start_date": ["2026-08-13"],
+            "end_date": ["2026-09-12"],
+            "steps": ["connection-check"],
+        }
+
+        values = CostAgentHandler._validate_run(None, form)
+
+        self.assertEqual(values[-1], "zai/glm-5.3")
 
 
 if __name__ == "__main__":

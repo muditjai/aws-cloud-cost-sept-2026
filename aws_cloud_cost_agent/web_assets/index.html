@@ -30,7 +30,7 @@
             <h2>New run</h2>
           </div>
 
-          <label for="aws-account">AWS account</label>
+          <label for="aws-account">AWS account ID</label>
           <input
             id="aws-account"
             name="aws_account"
@@ -41,6 +41,19 @@
             maxlength="12"
             autocomplete="off"
             placeholder="12-digit account ID"
+          >
+
+          <label class="field-label" for="respan-model">Respan model</label>
+          <input
+            id="respan-model"
+            name="respan_model"
+            type="text"
+            value="$respan_model"
+            maxlength="100"
+            pattern="[A-Za-z0-9][A-Za-z0-9._/-]{0,99}"
+            autocomplete="off"
+            spellcheck="false"
+            required
           >
 
           <div class="date-grid">

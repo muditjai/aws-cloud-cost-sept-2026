@@ -40,6 +40,7 @@ async def run_markdown_agent(
     prompt: str,
     tools: list[FunctionTool],
     use_web_search: bool = False,
+    model: str = RESPAN_MODEL,
 ) -> str:
     """Run one focused Respan chat-completions agent with local AWS tools."""
     client = _respan_client()
@@ -62,7 +63,7 @@ async def run_markdown_agent(
     for _ in range(MAX_TOOL_ROUNDS):
         response = await asyncio.to_thread(
             client.chat.completions.create,
-            model=RESPAN_MODEL,
+            model=model,
             messages=messages,
             tools=definitions,
             tool_choice="auto",

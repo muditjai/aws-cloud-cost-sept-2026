@@ -9,7 +9,6 @@ from unittest.mock import patch
 
 from aws_cloud_cost_agent.agent import (
     RESPAN_BASE_URL,
-    RESPAN_MODEL,
     _respan_client,
     run_markdown_agent,
 )
@@ -67,10 +66,12 @@ class AgentTests(unittest.TestCase):
         completions = _FakeCompletions()
         client = SimpleNamespace(chat=SimpleNamespace(completions=completions))
         with patch("aws_cloud_cost_agent.agent._respan_client", return_value=client):
-            result = asyncio.run(run_markdown_agent("Test", "Analyze", [echo]))
+            result = asyncio.run(
+                run_markdown_agent("Test", "Analyze", [echo], model="test/model")
+            )
 
         self.assertEqual(result, "# Complete")
-        self.assertEqual(completions.requests[0]["model"], RESPAN_MODEL)
+        self.assertEqual(completions.requests[0]["model"], "test/model")
         second_messages = completions.requests[1]["messages"]
         self.assertEqual(second_messages[-1]["role"], "tool")
         self.assertEqual(second_messages[-1]["content"], "BILLING")

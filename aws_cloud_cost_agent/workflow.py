@@ -3,7 +3,7 @@ from __future__ import annotations
 from datetime import date, datetime, timezone
 from pathlib import Path
 
-from .agent import run_markdown_agent
+from .agent import RESPAN_MODEL, run_markdown_agent
 from .prompt_loader import load_prompt
 from .tools.auth.aws_auth import get_account_identity_data, render_connection_check
 from .tools.bill_read.aws_billing import build_overall_bill_report
@@ -45,6 +45,7 @@ async def run_workflow(
     start_date: str,
     end_date: str,
     steps: list[str],
+    respan_model: str = RESPAN_MODEL,
 ) -> list[Path]:
     """Run selected assessment steps and return generated artifact paths."""
     identity = get_account_identity_data(config)
@@ -110,6 +111,7 @@ async def run_workflow(
                 f"AWS cost analysis: {service} / {sku}",
                 prompt,
                 service_analysis_tools(config, service),
+                model=respan_model,
             )
             artifacts.append(
                 _write_artifact(
@@ -129,6 +131,7 @@ async def run_workflow(
                 prompt,
                 recommendation_tools(config),
                 use_web_search=True,
+                model=respan_model,
             )
             artifacts.append(
                 _write_artifact(

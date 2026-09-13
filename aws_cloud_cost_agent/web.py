@@ -17,6 +17,7 @@ from string import Template
 from typing import Any
 from urllib.parse import parse_qs, quote, unquote, urlsplit
 
+from .agent import RESPAN_MODEL
 from .cli import PROJECT_ROOT, load_local_env
 from .markdown_renderer import render_markdown
 from .steps import AVAILABLE_STEPS
@@ -28,6 +29,7 @@ ASSET_DIR = Path(__file__).resolve().parent / "web_assets"
 DEFAULT_PORT = 8765
 MAX_FORM_BYTES = 64 * 1024
 ACCOUNT_PATTERN = re.compile(r"^\d{12}$")
+MODEL_PATTERN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._/-]{0,99}$")
 MODEL_STEPS = {"service-analysis", "recommendations"}
 ARTIFACT_GROUPS = (
     "Connection Check",
@@ -76,6 +78,7 @@ class RunManager:
         start_date: str,
         end_date: str,
         steps: list[str],
+        respan_model: str,
     ) -> RunState:
         with self._lock:
             if self._active_run_id:
@@ -94,7 +97,7 @@ class RunManager:
 
         thread = threading.Thread(
             target=self._execute,
-            args=(state.run_id, account_id, start_date, end_date, steps),
+            args=(state.run_id, account_id, start_date, end_date, steps, respan_model),
             daemon=True,
         )
         thread.start()
@@ -112,6 +115,7 @@ class RunManager:
         start_date: str,
         end_date: str,
         steps: list[str],
+        respan_model: str,
     ) -> None:
         try:
             artifacts = asyncio.run(
@@ -121,6 +125,7 @@ class RunManager:
                     start_date=start_date,
                     end_date=end_date,
                     steps=steps,
+                    respan_model=respan_model,
                 )
             )
             with self._lock:
@@ -166,8 +171,16 @@ class CostAgentHandler(BaseHTTPRequestHandler):
         try:
             form = self._read_form()
             self._validate_csrf(form)
-            account_id, start_date, end_date, steps = self._validate_run(form)
-            state = self.manager.start(account_id, start_date, end_date, steps)
+            account_id, start_date, end_date, steps, respan_model = self._validate_run(
+                form
+            )
+            state = self.manager.start(
+                account_id,
+                start_date,
+                end_date,
+                steps,
+                respan_model,
+            )
         except (UnicodeDecodeError, ValueError, RuntimeError) as error:
             self._serve_index({}, error=str(error), status=HTTPStatus.BAD_REQUEST)
             return
@@ -194,14 +207,21 @@ class CostAgentHandler(BaseHTTPRequestHandler):
     def _validate_run(
         self,
         form: dict[str, list[str]],
-    ) -> tuple[str | None, str, str, list[str]]:
+    ) -> tuple[str | None, str, str, list[str], str]:
         account_id = form.get("aws_account", [""])[0].strip() or None
+        respan_model = (
+            form.get("respan_model", [RESPAN_MODEL])[0].strip() or RESPAN_MODEL
+        )
         start_value = form.get("start_date", [""])[0]
         end_value = form.get("end_date", [""])[0]
         steps = list(dict.fromkeys(form.get("steps", [])))
 
         if account_id and not ACCOUNT_PATTERN.fullmatch(account_id):
             raise ValueError("AWS account ID must contain exactly 12 digits.")
+        if not MODEL_PATTERN.fullmatch(respan_model):
+            raise ValueError(
+                "Respan model must contain only letters, numbers, '.', '_', '/', or '-'."
+            )
         try:
             start_date = date.fromisoformat(start_value)
             end_date = date.fromisoformat(end_value)
@@ -216,7 +236,7 @@ class CostAgentHandler(BaseHTTPRequestHandler):
             raise ValueError(f"Unsupported steps: {', '.join(invalid_steps)}")
         if MODEL_STEPS.intersection(steps) and not os.getenv("RESPAN_API_KEY"):
             raise ValueError("RESPAN_API_KEY is required for analysis and recommendations.")
-        return account_id, start_value, end_value, steps
+        return account_id, start_value, end_value, steps, respan_model
 
     def _serve_index(
         self,
@@ -283,6 +303,7 @@ class CostAgentHandler(BaseHTTPRequestHandler):
         template = Template((ASSET_DIR / "index.html").read_text(encoding="utf-8"))
         page = template.safe_substitute(
             account_id=html.escape(os.getenv("AWS_ACCOUNT_ID", "")),
+            respan_model=html.escape(RESPAN_MODEL),
             start_date=(today - timedelta(days=30)).isoformat(),
             end_date=today.isoformat(),
             csrf_token=html.escape(self.csrf_token),

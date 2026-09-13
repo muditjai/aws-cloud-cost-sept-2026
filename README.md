@@ -116,7 +116,9 @@ aws-cloud-cost-web
 
 Then open `http://127.0.0.1:8765`. The page runs selected workflow steps in the
 background and renders Markdown files from `output_artifact/`. AWS and Respan
-credentials remain server-side and are never included in the page.
+credentials remain server-side and are never included in the page. The model
+field controls the Respan model used for that web run and defaults to
+`zai/glm-5.3`.
 
 ## Output
 
