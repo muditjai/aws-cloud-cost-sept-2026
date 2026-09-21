@@ -12,6 +12,11 @@ import {
   toUIMessageStream,
 } from "ai";
 import { z } from "zod";
+import {
+  CHAT_MODEL,
+  getCurrentWeather,
+  MAX_AGENT_STEPS,
+} from "../../../../agent/chat";
 
 // Allow streaming responses up to 30 seconds
 export const maxDuration = 30;
@@ -28,10 +33,10 @@ export async function POST(req: Request) {
   } = await req.json();
 
   const result = streamText({
-    model: openai("gpt-5.6-luna"),
+    model: openai(CHAT_MODEL),
     messages: await convertToModelMessages(messages),
     ...(system ? { system } : {}),
-    stopWhen: stepCountIs(10),
+    stopWhen: stepCountIs(MAX_AGENT_STEPS),
     tools: {
       ...frontendTools(tools ?? {}),
       get_current_weather: tool({
@@ -41,9 +46,7 @@ export async function POST(req: Request) {
             city: z.string(),
           }),
         ),
-        execute: async ({ city }) => {
-          return `The weather in ${city} is sunny`;
-        },
+        execute: getCurrentWeather,
       }),
     },
   });

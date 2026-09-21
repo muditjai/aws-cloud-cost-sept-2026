@@ -1,4 +1,4 @@
 .env
 frontend/.env.example
 frontend/node_modules/
-frontend/.next/
+.next/
