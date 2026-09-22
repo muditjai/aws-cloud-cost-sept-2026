@@ -35,7 +35,7 @@ function ThreadWithSuggestions() {
 
 export default function Home() {
   const runtime = useChatRuntime();
-
+  console.log("Home");
   return (
     <AssistantRuntimeProvider runtime={runtime}>
       <div className="h-full">

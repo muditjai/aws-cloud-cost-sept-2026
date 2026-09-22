@@ -1,0 +1,27 @@
+
+> frontend@0.0.0 dev
+> next dev
+
+⚠ Port 3000 is in use by process 371854, using available port 3001 instead.
+▲ Next.js 16.3.5 (Turbopack)
+- Local:         http://localhost:3001
+- Network:       http://10.138.0.9:3001
+- Environments: .env
+✓ Ready in 721ms
+✓ Running next.config.js took 43ms
+
+Home
+ GET / 200 in 1655ms (next.js: 459ms, application-code: 1196ms)
+ POST /api/chat 200 in 2.6s (next.js: 255ms, application-code: 2.4s)
+⚠ Port 3000 is in use by process 371854, using available port 3001 instead.
+▲ Next.js 16.3.5 (Turbopack)
+- Local:         http://localhost:3001
+- Network:       http://10.138.0.9:3001
+- Environments: .env
+✓ Ready in 705ms
+✓ Running next.config.js took 43ms
+
+Home
+ GET / 200 in 2.1s (next.js: 1043ms, application-code: 1014ms)
+Home
+ GET / 200 in 125ms (next.js: 17ms, application-code: 108ms)

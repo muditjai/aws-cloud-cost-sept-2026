@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev 2>&1 | tee -a log.txt ",
     "build": "next build",
     "start": "next start"
   },
