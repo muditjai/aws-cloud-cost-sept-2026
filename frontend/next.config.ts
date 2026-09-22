@@ -7,6 +7,7 @@ const nextConfig: NextConfig = {
   turbopack: {
     root: path.join(import.meta.dirname, ".."),
   },
+  cacheComponents: true,
   logging: {
     browserToTerminal: true,
     fetches: {
