@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "AI SDK v7 Example",
-  description: "Example using @assistant-ui/react with AI SDK v7",
+  title: "Runway | Cloud Cost Workspace",
+  description: "An AI-native cloud cost transformation workspace.",
 };
 
 export default function RootLayout({
