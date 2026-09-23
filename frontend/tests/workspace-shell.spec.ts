@@ -1,27 +1,45 @@
 import { expect, test } from "@playwright/test";
 
-test("artifacts can be hidden and reopened", async ({ page }) => {
+test("artifacts open and close in a drawer", async ({ page }) => {
   await page.goto("/connect");
 
-  const artifactsToggle = page.getByRole("button", { name: "Artifacts", exact: true });
+  const artifactsToggle = page.getByRole("button", {
+    name: "Artifacts",
+    exact: true,
+  });
 
-  await expect(artifactsToggle).toHaveAttribute("aria-expanded", "true");
-  await expect(page.getByRole("heading", { name: "Artifacts" })).toBeVisible();
-
-  await artifactsToggle.click();
-
-  await expect(artifactsToggle).toHaveAttribute("aria-expanded", "false");
-  await expect(page.getByRole("heading", { name: "Artifacts" })).not.toBeVisible();
+  await expect(page.getByRole("dialog")).not.toBeVisible();
 
   await artifactsToggle.click();
 
-  await expect(artifactsToggle).toHaveAttribute("aria-expanded", "true");
-  await expect(page.getByRole("heading", { name: "Artifacts" })).toBeVisible();
+  const artifactsDrawer = page.getByRole("dialog");
+  await expect(artifactsDrawer).toBeVisible();
+  await expect(
+    artifactsDrawer.getByRole("heading", { name: "Artifacts" }),
+  ).toBeVisible();
+  await expect(
+    artifactsDrawer.getByText("Connect artifacts", { exact: true }),
+  ).toBeVisible();
+
+  await artifactsDrawer
+    .getByRole("button", { name: "Close artifacts" })
+    .click();
+
+  await expect(artifactsDrawer).not.toBeVisible();
 });
 
 test("artifact content changes with the active stage", async ({ page }) => {
   await page.goto("/audit");
 
-  await expect(page.getByText("Audit artifacts", { exact: true })).toBeVisible();
-  await expect(page.getByText("Spend baselines and technical findings will appear here.")).toBeVisible();
+  await page.getByRole("button", { name: "Artifacts", exact: true }).click();
+
+  const artifactsDrawer = page.getByRole("dialog");
+  await expect(
+    artifactsDrawer.getByText("Audit artifacts", { exact: true }),
+  ).toBeVisible();
+  await expect(
+    artifactsDrawer.getByText(
+      "Spend baselines and technical findings will appear here.",
+    ),
+  ).toBeVisible();
 });
