@@ -3,6 +3,8 @@ import { AzureConnection } from "./azure";
 import { GcpConnection } from "./gcp";
 import { Plug } from "lucide-react";
 
+export const instant = false;
+
 export default function ConnectPage() {
   return (
     <section className="flex h-full min-h-0 flex-col overflow-y-auto px-6 py-10 sm:px-10 lg:px-14">

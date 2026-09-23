@@ -1,0 +1,44 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model CloudConnection {
+  id                  String         @id @default(cuid())
+  provider            String
+  authMethod          String
+  status              String         @default("pending")
+  regionsJson         String
+  externalId          String?
+  roleArn             String?
+  accountId           String?
+  principalArn        String?
+  credentialReference String?
+  verificationError   String?
+  createdAt           DateTime       @default(now())
+  updatedAt           DateTime       @updatedAt
+  ingestionRuns       IngestionRun[]
+
+  @@index([provider, status])
+  @@index([accountId])
+}
+
+model IngestionRun {
+  id           String          @id @default(cuid())
+  connectionId String
+  kind         String
+  status       String          @default("queued")
+  regionsJson  String
+  error        String?
+  startedAt    DateTime?
+  completedAt  DateTime?
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+  connection   CloudConnection @relation(fields: [connectionId], references: [id], onDelete: Cascade)
+
+  @@index([connectionId, status])
+}

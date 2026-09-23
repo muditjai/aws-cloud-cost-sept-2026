@@ -19,30 +19,119 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  awsConnectionResponseSchema,
+  defaultAwsRegion,
+  type AwsConnection,
+} from "@/lib/cloud-connections/contracts";
 import { Copy } from "lucide-react";
-import { useEffect, useState, type FormEvent } from "react";
+import { useState, useTransition, type FormEvent } from "react";
 
 export function AwsConnection() {
   const [isOpen, setIsOpen] = useState(false);
-  const [externalId, setExternalId] = useState("");
+  const [roleConnection, setRoleConnection] = useState<AwsConnection | null>(null);
   const [hasCopiedExternalId, setHasCopiedExternalId] = useState(false);
+  const [connectionMessage, setConnectionMessage] = useState<string | null>(null);
+  const [isPending, startTransition] = useTransition();
 
-  useEffect(() => {
-    setExternalId(`migracle-${crypto.randomUUID()}`);
-  }, []);
+  function handleOpenChange(open: boolean) {
+    setIsOpen(open);
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    if (open && !roleConnection) {
+      void prepareRoleConnection();
+    }
+  }
+
+  async function prepareRoleConnection() {
+    try {
+      const connection = await createAwsConnection("aws-role", [defaultAwsRegion]);
+
+      setRoleConnection(connection);
+      setConnectionMessage(null);
+    } catch {
+      setConnectionMessage(
+        "Could not prepare the IAM role connection. Close the dialog and try again.",
+      );
+    }
+  }
+
+  function handleRoleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setIsOpen(false);
+
+    if (!roleConnection) {
+      return;
+    }
+
+    const formData = new FormData(event.currentTarget);
+    const roleArn = formData.get("aws-role-arn");
+    const regions = parseRegions(formData.get("aws-role-regions"));
+
+    if (typeof roleArn !== "string") {
+      return;
+    }
+
+    startTransition(async () => {
+      try {
+        const connection = await verifyAwsConnection(roleConnection.id, {
+          authMethod: "aws-role",
+          roleArn,
+          regions,
+        });
+
+        setRoleConnection(connection);
+        setConnectionMessage(`Verified AWS account ${connection.accountId}.`);
+      } catch {
+        setConnectionMessage(
+          "AWS could not verify this role. Check its trust policy, external ID, and read-only permissions.",
+        );
+      }
+    });
+  }
+
+  function handleKeySubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    const formData = new FormData(event.currentTarget);
+    const accessKeyId = formData.get("aws-access-key-id");
+    const secretAccessKey = formData.get("aws-secret-access-key");
+    const regions = parseRegions(formData.get("aws-key-regions"));
+
+    if (typeof accessKeyId !== "string" || typeof secretAccessKey !== "string") {
+      return;
+    }
+
+    startTransition(async () => {
+      try {
+        const connection = await createAwsConnection("aws-keys", [defaultAwsRegion]);
+        const verifiedConnection = await verifyAwsConnection(connection.id, {
+          authMethod: "aws-keys",
+          accessKeyId,
+          secretAccessKey,
+          regions,
+        });
+
+        setConnectionMessage(
+          `Verified AWS account ${verifiedConnection.accountId}.`,
+        );
+      } catch {
+        setConnectionMessage(
+          "AWS could not verify these access keys. Check the keys and read-only permissions.",
+        );
+      }
+    });
   }
 
   async function handleCopyExternalId() {
-    await navigator.clipboard.writeText(externalId);
+    if (!roleConnection?.externalId) {
+      return;
+    }
+
+    await navigator.clipboard.writeText(roleConnection.externalId);
     setHasCopiedExternalId(true);
   }
 
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+    <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
         <Button
           variant="outline"
@@ -67,6 +156,12 @@ export function AwsConnection() {
           </DialogDescription>
         </DialogHeader>
 
+        {connectionMessage ? (
+          <p className="text-sm text-muted-foreground" role="status">
+            {connectionMessage}
+          </p>
+        ) : null}
+
         <Tabs defaultValue="aws-role">
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="aws-role">IAM role</TabsTrigger>
@@ -74,7 +169,7 @@ export function AwsConnection() {
           </TabsList>
 
           <TabsContent value="aws-role">
-            <form className="flex flex-col gap-6" onSubmit={handleSubmit}>
+            <form className="flex flex-col gap-6" onSubmit={handleRoleSubmit}>
               <FieldGroup className="gap-4">
                 <Field>
                   <FieldLabel htmlFor="aws-role-arn">IAM role ARN</FieldLabel>
@@ -95,7 +190,7 @@ export function AwsConnection() {
                   <Input
                     id="aws-external-id"
                     name="aws-external-id"
-                    value={externalId}
+                    value={roleConnection?.externalId ?? "Preparing external ID..."}
                     readOnly
                   />
                   <Button
@@ -103,7 +198,7 @@ export function AwsConnection() {
                     variant="outline"
                     size="sm"
                     onClick={handleCopyExternalId}
-                    disabled={!externalId}
+                    disabled={!roleConnection?.externalId}
                   >
                     <Copy data-icon="inline-start" aria-hidden="true" />
                     {hasCopiedExternalId ? "Copied" : "Copy external ID"}
@@ -116,7 +211,7 @@ export function AwsConnection() {
                   <Input
                     id="aws-role-regions"
                     name="aws-role-regions"
-                    placeholder="All supported regions"
+                    defaultValue={defaultAwsRegion}
                     autoComplete="off"
                   />
                 </Field>
@@ -127,13 +222,15 @@ export function AwsConnection() {
                     Cancel
                   </Button>
                 </DialogClose>
-                <Button type="submit">Continue</Button>
+                <Button type="submit" disabled={!roleConnection || isPending}>
+                  {isPending ? "Verifying..." : "Verify connection"}
+                </Button>
               </DialogFooter>
             </form>
           </TabsContent>
 
           <TabsContent value="aws-keys">
-            <form className="flex flex-col gap-6" onSubmit={handleSubmit}>
+            <form className="flex flex-col gap-6" onSubmit={handleKeySubmit}>
               <FieldGroup className="gap-4">
                 <Field>
                   <FieldLabel htmlFor="aws-access-key-id">
@@ -168,7 +265,7 @@ export function AwsConnection() {
                   <Input
                     id="aws-key-regions"
                     name="aws-key-regions"
-                    placeholder="All supported regions"
+                    defaultValue={defaultAwsRegion}
                     autoComplete="off"
                   />
                 </Field>
@@ -179,7 +276,9 @@ export function AwsConnection() {
                     Cancel
                   </Button>
                 </DialogClose>
-                <Button type="submit">Continue</Button>
+                <Button type="submit" disabled={isPending}>
+                  {isPending ? "Verifying..." : "Verify connection"}
+                </Button>
               </DialogFooter>
             </form>
           </TabsContent>
@@ -187,4 +286,66 @@ export function AwsConnection() {
       </DialogContent>
     </Dialog>
   );
+}
+
+async function createAwsConnection(
+  authMethod: "aws-role" | "aws-keys",
+  regions: string[],
+) {
+  const response = await fetch("/api/connections/aws", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ authMethod, regions }),
+  });
+  const body: unknown = await response.json();
+  const connection = awsConnectionResponseSchema.safeParse(body);
+
+  if (!response.ok || !connection.success) {
+    throw new Error("Could not create the AWS connection.");
+  }
+
+  return connection.data;
+}
+
+async function verifyAwsConnection(
+  connectionId: string,
+  body:
+    | {
+        authMethod: "aws-role";
+        roleArn: string;
+        regions: string[];
+      }
+    | {
+        authMethod: "aws-keys";
+        accessKeyId: string;
+        secretAccessKey: string;
+        regions: string[];
+      },
+) {
+  const response = await fetch(`/api/connections/${connectionId}/verify`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  const responseBody: unknown = await response.json();
+  const connection = awsConnectionResponseSchema.safeParse(responseBody);
+
+  if (!response.ok || !connection.success) {
+    throw new Error("Could not verify the AWS connection.");
+  }
+
+  return connection.data;
+}
+
+function parseRegions(value: FormDataEntryValue | null) {
+  if (typeof value !== "string") {
+    return [defaultAwsRegion];
+  }
+
+  const regions = value
+    .split(",")
+    .map((region) => region.trim())
+    .filter(Boolean);
+
+  return regions.length > 0 ? regions : [defaultAwsRegion];
 }
