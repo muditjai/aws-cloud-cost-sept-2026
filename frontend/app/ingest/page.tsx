@@ -1,5 +1,5 @@
-import { StagePage } from "@/components/layout/stage-page";
+import { StageChat } from "@/components/workspace/stage-chat";
 
 export default function IngestPage() {
-  return <StagePage title="Ingest" />;
+  return <StageChat workflowId="ingest" />;
 }

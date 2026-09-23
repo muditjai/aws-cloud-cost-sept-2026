@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "next dev 2>&1 | tee -a log.txt ",
+    "dev": "next dev --port 3001 2>&1 | tee log.txt",
     "build": "next build",
     "start": "next start",
     "test:e2e": "playwright test"

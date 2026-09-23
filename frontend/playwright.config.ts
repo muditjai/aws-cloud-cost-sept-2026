@@ -6,7 +6,7 @@ export default defineConfig({
     baseURL: "http://127.0.0.1:3001",
   },
   webServer: {
-    command: "npx next dev --port 3001",
+    command: "npm run dev",
     url: "http://127.0.0.1:3001",
     reuseExistingServer: !process.env.CI,
   },
