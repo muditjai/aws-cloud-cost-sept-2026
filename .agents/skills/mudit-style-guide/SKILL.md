@@ -1,7 +1,7 @@
 ---
 name: mudit-style-guide
 
-description: Mudit (project owner) coding standards, syntax rules, and architectural guidelines for React 19, Next.js App Router, TypeScript, and pnpm.
+description: Mudit (project owner) coding standards, syntax rules, and architectural guidelines for React 19, Next.js App Router, TypeScript, pnpm.
 ---
 
 # Enterprise Front-End Development Style Guide
