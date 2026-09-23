@@ -3,7 +3,6 @@
 import {
   type PropsWithChildren,
   useState,
-  type FC,
   isValidElement,
 } from "react";
 import {
@@ -41,11 +40,11 @@ import { TooltipIconButton } from "@/components/assistant-ui/elements/tooltip-ic
 import { useAttachmentSrc } from "@/hooks/use-attachment-src";
 import { cn } from "@/lib/utils";
 
-type AttachmentPreviewProps = {
-  src: string;
-};
+interface AttachmentPreviewProps {
+  readonly src: string;
+}
 
-const AttachmentPreview: FC<AttachmentPreviewProps> = ({ src }) => {
+const AttachmentPreview = ({ src }: AttachmentPreviewProps) => {
   const [isLoaded, setIsLoaded] = useState(false);
   return (
     <img
@@ -62,7 +61,7 @@ const AttachmentPreview: FC<AttachmentPreviewProps> = ({ src }) => {
   );
 };
 
-const AttachmentPreviewDialog: FC<PropsWithChildren> = ({ children }) => {
+const AttachmentPreviewDialog = ({ children }: PropsWithChildren) => {
   const src = useAttachmentSrc();
 
   if (!src) return children;
@@ -91,7 +90,7 @@ const AttachmentPreviewDialog: FC<PropsWithChildren> = ({ children }) => {
   );
 };
 
-const AttachmentThumb: FC = () => {
+const AttachmentThumb = () => {
   const src = useAttachmentSrc();
 
   return (
@@ -108,7 +107,7 @@ const AttachmentThumb: FC = () => {
   );
 };
 
-const AttachmentUI: FC = () => {
+const AttachmentUI = () => {
   const aui = useAui();
   const isComposer = aui.attachment.source !== "message";
 
@@ -216,7 +215,7 @@ const AttachmentUI: FC = () => {
   );
 };
 
-const AttachmentRemove: FC = () => {
+const AttachmentRemove = () => {
   return (
     <AttachmentPrimitive.Remove asChild>
       <TooltipIconButton
@@ -230,7 +229,7 @@ const AttachmentRemove: FC = () => {
   );
 };
 
-export const UserMessageAttachments: FC = () => {
+export const UserMessageAttachments = () => {
   return (
     <div className="aui-user-message-attachments-end col-span-full col-start-1 row-start-1 flex w-full flex-row justify-end gap-2">
       <MessagePrimitive.Attachments>
@@ -240,7 +239,7 @@ export const UserMessageAttachments: FC = () => {
   );
 };
 
-export const ComposerAttachments: FC = () => {
+export const ComposerAttachments = () => {
   return (
     <div className="aui-composer-attachments flex w-full flex-row items-center gap-2 overflow-x-auto empty:hidden">
       <ComposerPrimitive.Attachments>
@@ -250,7 +249,7 @@ export const ComposerAttachments: FC = () => {
   );
 };
 
-export const ComposerAddAttachment: FC = () => {
+export const ComposerAddAttachment = () => {
   return (
     <ComposerPrimitive.AddAttachment asChild>
       <TooltipIconButton

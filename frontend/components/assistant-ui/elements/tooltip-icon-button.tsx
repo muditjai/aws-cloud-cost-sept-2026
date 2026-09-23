@@ -1,6 +1,6 @@
 "use client";
 
-import { type ComponentPropsWithRef, forwardRef } from "react";
+import { type ComponentPropsWithRef } from "react";
 import { Slot } from "radix-ui";
 
 import {
@@ -17,10 +17,14 @@ export type TooltipIconButtonProps = ComponentPropsWithRef<typeof Button> & {
   side?: "top" | "bottom" | "left" | "right";
 };
 
-export const TooltipIconButton = forwardRef<
-  HTMLButtonElement,
-  TooltipIconButtonProps
->(({ children, tooltip, side = "bottom", className, ...rest }, ref) => {
+export function TooltipIconButton({
+  children,
+  tooltip,
+  side = "bottom",
+  className,
+  ref,
+  ...rest
+}: TooltipIconButtonProps) {
   return (
     <TooltipProvider delayDuration={0}>
       <Tooltip>
@@ -43,6 +47,4 @@ export const TooltipIconButton = forwardRef<
       </Tooltip>
     </TooltipProvider>
   );
-});
-
-TooltipIconButton.displayName = "TooltipIconButton";
+}

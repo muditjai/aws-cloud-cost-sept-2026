@@ -1,6 +1,6 @@
 "use client";
 
-import { memo, type FC } from "react";
+import { memo } from "react";
 import { cva, type VariantProps } from "class-variance-authority";
 import {
   FileIcon,
@@ -10,6 +10,7 @@ import {
   VideoIcon,
   BracesIcon,
   DownloadIcon,
+  type LucideIcon,
 } from "lucide-react";
 import type { FileMessagePartComponent } from "@assistant-ui/react";
 import { cn } from "@/lib/utils";
@@ -36,7 +37,7 @@ const fileVariants = cva(
   },
 );
 
-function getMimeTypeIcon(mimeType: string): FC<{ className?: string }> {
+function getMimeTypeIcon(mimeType: string): LucideIcon {
   const type = mimeType.toLowerCase();
   if (type.startsWith("image/")) {
     return ImageIcon;

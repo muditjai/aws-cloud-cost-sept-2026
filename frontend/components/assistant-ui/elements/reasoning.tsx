@@ -2,8 +2,8 @@
 
 import {
   createContext,
+  use,
   useCallback,
-  useContext,
   useEffect,
   useLayoutEffect,
   useRef,
@@ -213,7 +213,7 @@ function ReasoningContent({
   children,
   ...props
 }: React.ComponentProps<typeof CollapsibleContent>) {
-  const isPreview = useContext(ReasoningPreviewContext);
+  const isPreview = use(ReasoningPreviewContext);
 
   return (
     <CollapsibleContent
@@ -242,7 +242,7 @@ function ReasoningText({
   children,
   ...props
 }: React.ComponentProps<"div">) {
-  const isPreview = useContext(ReasoningPreviewContext);
+  const isPreview = use(ReasoningPreviewContext);
   const scrollRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
 

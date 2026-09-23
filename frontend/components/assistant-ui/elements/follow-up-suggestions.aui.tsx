@@ -1,9 +1,9 @@
 "use client";
 
 import { AuiIf, useAuiState, ThreadPrimitive } from "@assistant-ui/react";
-import { useCallback, useEffect, useRef, useState, type FC } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
-const FollowupSuggestionsRow: FC = () => {
+const FollowupSuggestionsRow = () => {
   const suggestions = useAuiState((s) => s.thread.suggestions);
   const scrollRef = useRef<HTMLDivElement>(null);
   const rtlRef = useRef<boolean | null>(null);
@@ -69,7 +69,7 @@ const FollowupSuggestionsRow: FC = () => {
   );
 };
 
-export const ThreadFollowupSuggestions: FC = () => (
+export const ThreadFollowupSuggestions = () => (
   <AuiIf
     condition={(s) =>
       !s.thread.isEmpty &&

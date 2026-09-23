@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "next dev 2>&1 | tee -a log.txt ",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "@ai-sdk/openai": "^4.0.66",
@@ -28,6 +29,7 @@
   },
   "devDependencies": {
     "@assistant-ui/next": "latest",
+    "@playwright/test": "^1.63.0",
     "@tailwindcss/postcss": "^4.3.3",
     "@types/node": "^26.5.1",
     "@types/react": "^19.3.0",

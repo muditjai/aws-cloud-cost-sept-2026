@@ -16,7 +16,7 @@ import {
   CHAT_MODEL,
   getCurrentWeather,
   MAX_AGENT_STEPS,
-} from "../../../../agent/chat";
+} from "../../../../backend_agent/chat";
 
 // Allow streaming responses up to 30 seconds
 export const maxDuration = 30;

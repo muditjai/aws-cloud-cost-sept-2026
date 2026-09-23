@@ -64,9 +64,8 @@ import {
 } from "lucide-react";
 import {
   createContext,
-  useContext,
+  use,
   type ComponentType,
-  type FC,
   type PropsWithChildren,
 } from "react";
 
@@ -147,7 +146,7 @@ const isHistoryLoadingView = (s: AssistantState) =>
   !s.thread.isDisabled &&
   !s.threads.isLoading;
 
-const ThreadHistorySkeleton: FC = () => (
+const ThreadHistorySkeleton = () => (
   <div
     data-slot="aui_thread-history-skeleton"
     role="status"
@@ -168,10 +167,10 @@ const ThreadHistorySkeleton: FC = () => (
   </div>
 );
 
-export const Thread: FC<ThreadProps> = ({
+export const Thread = ({
   components = EMPTY_COMPONENTS,
   autoFocus = true,
-}) => {
+}: ThreadProps) => {
   const isEmpty = useAuiState(isNewChatView);
 
   return (
@@ -181,11 +180,16 @@ export const Thread: FC<ThreadProps> = ({
   );
 };
 
-const ThreadRoot: FC<{ isEmpty: boolean; autoFocus: boolean }> = ({
+interface ThreadRootProps {
+  readonly isEmpty: boolean;
+  readonly autoFocus: boolean;
+}
+
+const ThreadRoot = ({
   isEmpty,
   autoFocus,
-}) => {
-  const { Welcome = ThreadWelcome } = useContext(ThreadComponentsContext);
+}: ThreadRootProps) => {
+  const { Welcome = ThreadWelcome } = use(ThreadComponentsContext);
 
   return (
     <ThreadPrimitive.Root
@@ -245,9 +249,9 @@ const ThreadRoot: FC<{ isEmpty: boolean; autoFocus: boolean }> = ({
   );
 };
 
-const ThreadMessage: FC = () => {
+const ThreadMessage = () => {
   const { AssistantMessage: AssistantMessageComponent = AssistantMessage } =
-    useContext(ThreadComponentsContext);
+    use(ThreadComponentsContext);
   const role = useAuiState((s) => s.message.role);
   const isEditing = useAuiState((s) => s.message.composer.isEditing);
   const isSpoken = useAuiState((s) => s.message.metadata.modality === "voice");
@@ -274,7 +278,7 @@ const SpokenText: TextMessagePartComponent = ({ text }) => (
   <p className="aui-spoken-message-text m-0">{text}</p>
 );
 
-const SpokenMessage: FC = () => {
+const SpokenMessage = () => {
   const role = useAuiState((s) => s.message.role);
   const position = useVoiceRunPosition();
   const isSpeaking = useAuiState(
@@ -338,7 +342,7 @@ const SpokenMessage: FC = () => {
   );
 };
 
-const SpokenActionBar: FC = () => {
+const SpokenActionBar = () => {
   return (
     <ActionBarPrimitive.Root
       hideWhenRunning
@@ -359,7 +363,7 @@ const SpokenActionBar: FC = () => {
   );
 };
 
-const ThreadScrollToBottom: FC = () => {
+const ThreadScrollToBottom = () => {
   return (
     <ThreadPrimitive.ScrollToBottom asChild>
       <TooltipIconButton
@@ -373,7 +377,7 @@ const ThreadScrollToBottom: FC = () => {
   );
 };
 
-const ThreadWelcome: FC = () => {
+const ThreadWelcome = () => {
   return (
     <div className="aui-thread-welcome-root mb-6 flex flex-col px-2">
       <p className="aui-thread-welcome-message-inner fade-in slide-in-from-bottom-1 animate-in fill-mode-both text-2xl font-medium tracking-tight duration-200">
@@ -383,7 +387,7 @@ const ThreadWelcome: FC = () => {
   );
 };
 
-const ThreadSuggestions: FC = () => {
+const ThreadSuggestions = () => {
   return (
     <div className="aui-thread-welcome-suggestions flex w-full flex-col">
       <ThreadPrimitive.Suggestions>
@@ -393,7 +397,7 @@ const ThreadSuggestions: FC = () => {
   );
 };
 
-const ThreadSuggestionItem: FC = () => {
+const ThreadSuggestionItem = () => {
   return (
     <div className="aui-thread-welcome-suggestion-display fade-in slide-in-from-bottom-2 animate-in fill-mode-both duration-200">
       <SuggestionPrimitive.Trigger send asChild>
@@ -417,7 +421,11 @@ const ThreadSuggestionItem: FC = () => {
   );
 };
 
-const Composer: FC<{ autoFocus: boolean }> = ({ autoFocus }) => {
+interface ComposerProps {
+  readonly autoFocus: boolean;
+}
+
+const Composer = ({ autoFocus }: ComposerProps) => {
   return (
     <ComposerPrimitive.Root className="aui-composer-root relative flex w-full flex-col">
       <ComposerPrimitive.AttachmentDropzone asChild>
@@ -441,7 +449,7 @@ const Composer: FC<{ autoFocus: boolean }> = ({ autoFocus }) => {
   );
 };
 
-const ComposerAction: FC = () => {
+const ComposerAction = () => {
   return (
     <div className="aui-composer-action-wrapper relative flex items-center justify-between">
       <ComposerAddAttachment />
@@ -515,7 +523,7 @@ const ComposerAction: FC = () => {
   );
 };
 
-const MessageError: FC = () => {
+const MessageError = () => {
   return (
     <MessagePrimitive.Error>
       <ErrorPrimitive.Root className="aui-message-error-root border-destructive bg-destructive/10 text-destructive dark:bg-destructive/5 mt-2 rounded-md border p-3 text-sm dark:text-red-200">
@@ -525,13 +533,13 @@ const MessageError: FC = () => {
   );
 };
 
-const AssistantMessage: FC = () => {
+const AssistantMessage = () => {
   const {
     ToolFallback: ToolFallbackComponent = ToolFallback,
     ToolGroup,
     ReasoningGroup,
     TaskGroup: TaskGroupComponent,
-  } = useContext(ThreadComponentsContext);
+  } = use(ThreadComponentsContext);
   const groupBy = TaskGroupComponent ? taskAwareGroupBy : messageGroupBy;
 
   const ACTION_BAR_PT = "pt-1.5";
@@ -635,7 +643,7 @@ const AssistantMessage: FC = () => {
   );
 };
 
-const AssistantActionBar: FC = () => {
+const AssistantActionBar = () => {
   return (
     <ActionBarPrimitive.Root
       hideWhenRunning
@@ -714,7 +722,7 @@ const UserImagePart: ImageMessagePartComponent = (part) => (
   </div>
 );
 
-const UserMessage: FC = () => {
+const UserMessage = () => {
   return (
     <MessagePrimitive.Root
       data-slot="aui_user-message-root"
@@ -742,7 +750,7 @@ const UserMessage: FC = () => {
   );
 };
 
-const UserActionBar: FC = () => {
+const UserActionBar = () => {
   return (
     <ActionBarPrimitive.Root
       hideWhenRunning
@@ -758,7 +766,7 @@ const UserActionBar: FC = () => {
   );
 };
 
-const EditComposer: FC = () => {
+const EditComposer = () => {
   return (
     <MessagePrimitive.Root
       data-slot="aui_edit-composer-wrapper"
@@ -786,10 +794,10 @@ const EditComposer: FC = () => {
   );
 };
 
-const BranchPicker: FC<BranchPickerPrimitive.Root.Props> = ({
+const BranchPicker = ({
   className,
   ...rest
-}) => {
+}: BranchPickerPrimitive.Root.Props) => {
   return (
     <BranchPickerPrimitive.Root
       hideWhenSingleBranch

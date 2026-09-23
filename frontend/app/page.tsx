@@ -1,6 +1,9 @@
 "use client";
 
-import { Thread } from "@/components/assistant-ui/elements/thread.aui";
+import {
+  Thread,
+  type ThreadComponents,
+} from "@/components/assistant-ui/elements/thread.aui";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -29,7 +32,7 @@ import {
   Wrench,
   type LucideIcon,
 } from "lucide-react";
-import { useState, type FC } from "react";
+import { createContext, Suspense, use, useMemo, useState } from "react";
 
 type WorkflowId =
   | "connect"
@@ -48,6 +51,21 @@ interface WorkflowStep {
   readonly description: string;
   readonly icon: LucideIcon;
 }
+
+interface ThreadWithSuggestionsProps {
+  readonly workflow: WorkflowStep;
+}
+
+interface ChatWorkspaceProps {
+  readonly workflow: WorkflowStep;
+}
+
+interface ArtifactPanelProps {
+  readonly workflow: WorkflowStep;
+  readonly onClose: () => void;
+}
+
+const WorkflowContext = createContext<WorkflowStep | undefined>(undefined);
 
 const WORKFLOW_STEPS: readonly WorkflowStep[] = [
   { id: "connect", label: "Connect", description: "Link your cloud environment.", icon: Plug },
@@ -71,7 +89,13 @@ const getWorkflowStep = (workflowId: WorkflowId): WorkflowStep => {
   return step;
 };
 
-const WorkflowWelcome: FC<{ readonly workflow: WorkflowStep }> = ({ workflow }) => {
+const WorkflowWelcome = () => {
+  const workflow = use(WorkflowContext);
+
+  if (workflow === undefined) {
+    throw new Error("WorkflowWelcome must be rendered within WorkflowContext.");
+  }
+
   const WorkflowIcon = workflow.icon;
 
   return (
@@ -92,34 +116,60 @@ const WorkflowWelcome: FC<{ readonly workflow: WorkflowStep }> = ({ workflow }) 
   );
 };
 
-const ThreadWithSuggestions: FC<{ readonly workflow: WorkflowStep }> = ({ workflow }) => {
+const WORKFLOW_THREAD_COMPONENTS = {
+  Welcome: WorkflowWelcome,
+} satisfies ThreadComponents;
+
+const ThreadWithSuggestions = ({ workflow }: ThreadWithSuggestionsProps) => {
   const aui = useAui();
-  const config = AuiConfig({
-    suggestions: Suggestions([
-      {
-        title: `Start ${workflow.label.toLowerCase()}`,
-        label: "with the information you need from me",
-        prompt: `Help me begin the ${workflow.label} phase for my cloud cost engagement. What information do you need?`,
-      },
-      {
-        title: "Show me",
-        label: `the expected outcome for ${workflow.label.toLowerCase()}`,
-        prompt: `What should the ${workflow.label} phase produce, and how will we validate it?`,
-      },
-    ]),
-  });
+  const config = useMemo(
+    () =>
+      AuiConfig({
+        suggestions: Suggestions([
+          {
+            title: `Start ${workflow.label.toLowerCase()}`,
+            label: "with the information you need from me",
+            prompt: `Help me begin the ${workflow.label} phase for my cloud cost engagement. What information do you need?`,
+          },
+          {
+            title: "Show me",
+            label: `the expected outcome for ${workflow.label.toLowerCase()}`,
+            prompt: `What should the ${workflow.label} phase produce, and how will we validate it?`,
+          },
+        ]),
+      }),
+    [workflow],
+  );
 
   return (
-    <AuiProvider extends={aui} config={config}>
-      <Thread components={{ Welcome: () => <WorkflowWelcome workflow={workflow} /> }} />
-    </AuiProvider>
+    <WorkflowContext value={workflow}>
+      <AuiProvider extends={aui} config={config}>
+        <Thread components={WORKFLOW_THREAD_COMPONENTS} />
+      </AuiProvider>
+    </WorkflowContext>
   );
 };
 
-const ArtifactPanel: FC<{
-  readonly workflow: WorkflowStep;
-  readonly onClose: () => void;
-}> = ({ workflow, onClose }) => {
+const ChatWorkspace = ({ workflow }: ChatWorkspaceProps) => {
+  const runtime = useChatRuntime();
+
+  return (
+    <AssistantRuntimeProvider runtime={runtime}>
+      <ThreadWithSuggestions workflow={workflow} />
+    </AssistantRuntimeProvider>
+  );
+};
+
+const ChatWorkspaceFallback = () => (
+  <div
+    className="flex h-full items-center justify-center text-sm text-slate-500"
+    role="status"
+  >
+    Loading assistant workspace…
+  </div>
+);
+
+const ArtifactPanel = ({ workflow, onClose }: ArtifactPanelProps) => {
   return (
     <aside className="flex h-full w-full flex-col bg-slate-50/70">
       <div className="flex h-16 shrink-0 items-center justify-between border-b border-slate-200 px-5">
@@ -164,15 +214,13 @@ const ArtifactPanel: FC<{
   );
 };
 
-export default function Home(): React.ReactNode {
+export default function Home() {
   const [activeWorkflowId, setActiveWorkflowId] = useState<WorkflowId>("connect");
   const [isArtifactPanelOpen, setIsArtifactPanelOpen] = useState(true);
-  const runtime = useChatRuntime();
   const activeWorkflow = getWorkflowStep(activeWorkflowId);
 
   return (
-    <AssistantRuntimeProvider runtime={runtime}>
-      <main className="flex h-full min-w-0 overflow-hidden bg-white text-slate-900">
+    <main className="flex h-full min-w-0 overflow-hidden bg-white text-slate-900">
         <aside className="flex w-64 shrink-0 flex-col border-r border-slate-200 bg-slate-950 text-slate-200">
           <div className="flex h-16 items-center gap-3 border-b border-white/10 px-5">
             <div className="flex size-8 items-center justify-center rounded-lg bg-sky-400 text-slate-950 shadow-sm">
@@ -247,7 +295,9 @@ export default function Home(): React.ReactNode {
           </header>
 
           <div className="min-h-0 flex-1">
-            <ThreadWithSuggestions workflow={activeWorkflow} />
+            <Suspense fallback={<ChatWorkspaceFallback />}>
+              <ChatWorkspace workflow={activeWorkflow} />
+            </Suspense>
           </div>
         </section>
 
@@ -256,7 +306,6 @@ export default function Home(): React.ReactNode {
             <ArtifactPanel workflow={activeWorkflow} onClose={() => setIsArtifactPanelOpen(false)} />
           </div>
         )}
-      </main>
-    </AssistantRuntimeProvider>
+    </main>
   );
 }
