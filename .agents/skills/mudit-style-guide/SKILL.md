@@ -10,6 +10,10 @@ This document defines the strict coding conventions, architectural boundaries, a
 
 ---
 
+## 0. General Principles
+1. **Variable Naming:** Use descriptive name eg "aws-role" or "aws-key" instead of generic names like "role" or "key". Avoid abbreviations unless they are widely recognized.
+
+
 ## 1. Core Architectural Philosophy
 
 1. **Server-First Architecture:** Treat components as React Server Components (RSC) by default. Push interactive boundaries ("Use Client") to the leaves of the component tree.
