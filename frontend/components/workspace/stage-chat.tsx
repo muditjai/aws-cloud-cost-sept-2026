@@ -4,7 +4,11 @@ import {
   Thread,
   type ThreadComponents,
 } from "@/components/assistant-ui/elements/thread.aui";
-import { getWorkflow, type WorkflowId, type WorkflowStep } from "@/lib/workflow";
+import {
+  getWorkflow,
+  type WorkflowId,
+  type WorkflowStep,
+} from "@/lib/workflow";
 import {
   AssistantRuntimeProvider,
   AuiConfig,
@@ -46,8 +50,9 @@ function WorkflowWelcome() {
         Move your cloud cost plan forward.
       </h2>
       <p className="mt-3 max-w-lg text-sm leading-6 text-slate-500">
-        {workflow.description} Use the workspace to give the agent context, review its work, and
-        collect evidence as the workflow progresses.
+        {workflow.description} Use this cloud cost reduction workflow to give
+        the agent context, review its work, and collect evidence as the workflow
+        progresses.
       </p>
     </div>
   );
@@ -99,8 +104,11 @@ function ChatRuntime({ workflow }: ChatRuntimeProps) {
 
 function StageChatFallback() {
   return (
-    <div className="flex h-full items-center justify-center text-sm text-slate-500" role="status">
-      Loading assistant workspace…
+    <div
+      className="flex h-full items-center justify-center text-sm text-slate-500"
+      role="status"
+    >
+      Loading cloud cost reduction assistant…
     </div>
   );
 }

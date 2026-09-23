@@ -1,4 +1,3 @@
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   Sidebar,
   SidebarContent,
@@ -33,7 +32,7 @@ export function WorkspaceSidebar({ activeWorkflowId }: WorkspaceSidebarProps) {
           </div>
           <div>
             <p className="text-sm font-semibold text-white">Migracle AI</p>
-            <p className="text-xs text-slate-400">Cloud cost workspace</p>
+            <p className="text-xs text-slate-400">Cloud cost reduction</p>
           </div>
         </div>
       </SidebarHeader>
@@ -91,21 +90,14 @@ export function WorkspaceSidebar({ activeWorkflowId }: WorkspaceSidebarProps) {
       </SidebarContent>
 
       <SidebarFooter className="border-t border-white/10 p-4">
-        <div className="flex items-center gap-3 rounded-lg px-2 py-1.5">
-          <Avatar size="sm">
-            <AvatarFallback className="bg-slate-700 text-slate-100">
-              AC
-            </AvatarFallback>
-          </Avatar>
-          <div className="min-w-0">
-            <p className="truncate text-xs font-medium text-slate-200">
-              Acme Cloud
-            </p>
-            <p className="truncate text-xs text-slate-500">
-              Cost transformation
-            </p>
-          </div>
-        </div>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton className="text-slate-400 hover:bg-white/6 hover:text-slate-100">
+              <Settings2 aria-hidden="true" />
+              <span>Settings</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
       </SidebarFooter>
     </Sidebar>
   );

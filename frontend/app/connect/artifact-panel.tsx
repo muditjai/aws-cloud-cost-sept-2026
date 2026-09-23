@@ -3,7 +3,7 @@
 import { DrawerDescription, DrawerTitle } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
 import type { ArtifactPanelProps } from "@/lib/artifacts";
-import { CheckCircle2, FileText, X } from "lucide-react";
+import { FileText, X } from "lucide-react";
 
 export function ConnectArtifactPanel({ onClose }: ArtifactPanelProps) {
   return (
@@ -40,23 +40,6 @@ export function ConnectArtifactPanel({ onClose }: ArtifactPanelProps) {
                 Cloud connection details and access checks will appear here.
               </p>
             </div>
-          </div>
-        </div>
-        <div>
-          <p className="mb-3 text-xs font-semibold tracking-[0.12em] text-slate-500 uppercase">
-            Workspace status
-          </p>
-          <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-            <div className="flex items-center gap-2 text-sm font-medium text-slate-900">
-              <CheckCircle2
-                className="size-4 text-emerald-600"
-                aria-hidden="true"
-              />
-              Workspace ready
-            </div>
-            <p className="mt-2 text-xs leading-5 text-slate-500">
-              Select a stage and send a message to begin generating artifacts.
-            </p>
           </div>
         </div>
       </div>

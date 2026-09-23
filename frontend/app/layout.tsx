@@ -3,8 +3,8 @@ import { WorkspaceShell } from "@/components/layout/workspace-shell";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Migracle AI | Cloud Cost Workspace",
-  description: "An AI-native cloud cost transformation workspace.",
+  title: "Migracle AI | Cloud Cost Reduction",
+  description: "An AI-native cloud cost reduction service.",
 };
 
 export default function RootLayout({

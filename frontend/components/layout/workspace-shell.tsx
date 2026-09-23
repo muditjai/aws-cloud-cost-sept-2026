@@ -27,10 +27,10 @@ function WorkspaceShellContent({ children }: WorkspaceShellProps) {
     <SidebarProvider>
       <WorkspaceSidebar activeWorkflowId={workflow.id} />
       <SidebarInset className="h-dvh min-w-0 overflow-hidden bg-white text-slate-900">
-          <header className="flex h-16 shrink-0 items-center justify-between border-b border-slate-200 px-5 sm:px-7">
+        <header className="flex h-16 shrink-0 items-center justify-between border-b border-slate-200 px-5 sm:px-7">
           <div className="min-w-0">
             <p className="text-xs font-medium text-slate-500">
-              Cloud cost transformation
+              Cloud cost reduction
             </p>
             <h1 className="truncate text-sm font-semibold text-slate-900">
               {workflow.label}
@@ -51,7 +51,7 @@ function WorkspaceShellFallback() {
       className="flex h-dvh items-center justify-center text-sm text-slate-500"
       role="status"
     >
-      Loading workspace…
+      Loading cloud cost reduction…
     </div>
   );
 }
