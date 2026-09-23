@@ -1,20 +1,42 @@
 "use client";
 
-import { ArtifactPanel } from "@/components/layout/artifact-panel";
+import { AuditArtifactPanel } from "@/app/audit/artifact-panel";
+import { ConnectArtifactPanel } from "@/app/connect/artifact-panel";
+import { CreateChangesArtifactPanel } from "@/app/create-changes/artifact-panel";
+import { DeployArtifactPanel } from "@/app/deploy/artifact-panel";
+import { IngestArtifactPanel } from "@/app/ingest/artifact-panel";
+import { LiveValidateArtifactPanel } from "@/app/live-validate/artifact-panel";
+import { ProveSavingsArtifactPanel } from "@/app/prove-savings/artifact-panel";
+import { RecommendArtifactPanel } from "@/app/recommend/artifact-panel";
+import { TestArtifactPanel } from "@/app/test/artifact-panel";
+import type { ArtifactPanelProps } from "@/components/layout/artifact-panel-frame";
 import { WorkspaceSidebar } from "@/components/layout/workspace-sidebar";
 import { Button } from "@/components/ui/button";
-import { getWorkflowFromPathname } from "@/lib/workflow";
+import { getWorkflowFromPathname, type WorkflowId } from "@/lib/workflow";
 import { PanelRightClose, PanelRightOpen } from "lucide-react";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { type ComponentType, useState } from "react";
 
 interface WorkspaceShellProps {
   readonly children: React.ReactNode;
 }
 
+const artifactPanels = {
+  connect: ConnectArtifactPanel,
+  ingest: IngestArtifactPanel,
+  audit: AuditArtifactPanel,
+  recommend: RecommendArtifactPanel,
+  "create-changes": CreateChangesArtifactPanel,
+  test: TestArtifactPanel,
+  deploy: DeployArtifactPanel,
+  "live-validate": LiveValidateArtifactPanel,
+  "prove-savings": ProveSavingsArtifactPanel,
+} satisfies Record<WorkflowId, ComponentType<ArtifactPanelProps>>;
+
 export function WorkspaceShell({ children }: WorkspaceShellProps) {
   const pathname = usePathname();
   const workflow = getWorkflowFromPathname(pathname);
+  const ArtifactPanel = artifactPanels[workflow.id];
   const [isArtifactPanelOpen, setIsArtifactPanelOpen] = useState(true);
 
   return (
@@ -48,7 +70,7 @@ export function WorkspaceShell({ children }: WorkspaceShellProps) {
 
       {isArtifactPanelOpen ? (
         <div id="artifact-panel" className="hidden w-80 shrink-0 border-l border-slate-200 lg:block">
-          <ArtifactPanel workflow={workflow} onClose={() => setIsArtifactPanelOpen(false)} />
+          <ArtifactPanel onClose={() => setIsArtifactPanelOpen(false)} />
         </div>
       ) : null}
     </main>
