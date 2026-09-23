@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { WorkspaceShell } from "@/components/layout/workspace-shell";
-import { Suspense } from "react";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -16,18 +15,8 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <Suspense fallback={<WorkspaceShellFallback />}>
-          <WorkspaceShell>{children}</WorkspaceShell>
-        </Suspense>
+        <WorkspaceShell>{children}</WorkspaceShell>
       </body>
     </html>
-  );
-}
-
-function WorkspaceShellFallback() {
-  return (
-    <div className="flex h-dvh items-center justify-center text-sm text-slate-500" role="status">
-      Loading workspace…
-    </div>
   );
 }

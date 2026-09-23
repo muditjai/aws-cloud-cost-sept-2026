@@ -17,7 +17,7 @@ import type { ArtifactPanelProps } from "@/lib/artifacts";
 import { getWorkflowFromPathname, type WorkflowId } from "@/lib/workflow";
 import { PanelRightOpen } from "lucide-react";
 import { usePathname } from "next/navigation";
-import { type ComponentType, useState } from "react";
+import { type ComponentType, Suspense, useState } from "react";
 
 interface WorkspaceShellProps {
   readonly children: React.ReactNode;
@@ -40,6 +40,14 @@ const artifactPanels = {
 } satisfies ArtifactPanelDictionary;
 
 export function WorkspaceShell({ children }: WorkspaceShellProps) {
+  return (
+    <Suspense fallback={<WorkspaceShellFallback />}>
+      <WorkspaceShellContent>{children}</WorkspaceShellContent>
+    </Suspense>
+  );
+}
+
+function WorkspaceShellContent({ children }: WorkspaceShellProps) {
   const pathname = usePathname();
   const workflow = getWorkflowFromPathname(pathname);
   const ArtifactPanel = artifactPanels[workflow.id];
@@ -78,5 +86,13 @@ export function WorkspaceShell({ children }: WorkspaceShellProps) {
         </Drawer>
       </SidebarInset>
     </SidebarProvider>
+  );
+}
+
+function WorkspaceShellFallback() {
+  return (
+    <div className="flex h-dvh items-center justify-center text-sm text-slate-500" role="status">
+      Loading workspace…
+    </div>
   );
 }
