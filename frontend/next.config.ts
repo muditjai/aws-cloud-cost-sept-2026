@@ -3,7 +3,6 @@ import path from "node:path";
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  cacheComponents: true,
   allowedDevOrigins: ["127.0.0.1"],
   transpilePackages: ["@assistant-ui/react", "@assistant-ui/ai-sdk"],
   async redirects() {
