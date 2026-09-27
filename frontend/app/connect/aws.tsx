@@ -20,16 +20,17 @@ import {
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
-  awsConnectionResponseSchema,
+  AwsConnectionResponse,
   defaultAwsRegion,
-  type AwsConnection,
-} from "@/lib/cloud-connections/contracts";
+  VerifyAwsConnectionRequest,
+} from "@/lib/connect/types";
 import { Copy } from "lucide-react";
 import { useState, useTransition, type FormEvent } from "react";
 
 export function AwsConnection() {
   const [isOpen, setIsOpen] = useState(false);
-  const [roleConnection, setRoleConnection] = useState<AwsConnection | null>(null);
+  const [roleConnection, setRoleConnection] =
+    useState<AwsConnectionResponse | null>(null);
   const [hasCopiedExternalId, setHasCopiedExternalId] = useState(false);
   const [connectionMessage, setConnectionMessage] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
@@ -298,7 +299,7 @@ async function createAwsConnection(
     body: JSON.stringify({ authMethod, regions }),
   });
   const body: unknown = await response.json();
-  const connection = awsConnectionResponseSchema.safeParse(body);
+  const connection = AwsConnectionResponse.safeParse(body);
 
   if (!response.ok || !connection.success) {
     throw new Error("Could not create the AWS connection.");
@@ -309,26 +310,21 @@ async function createAwsConnection(
 
 async function verifyAwsConnection(
   connectionId: string,
-  body:
-    | {
-        authMethod: "aws-role";
-        roleArn: string;
-        regions: string[];
-      }
-    | {
-        authMethod: "aws-keys";
-        accessKeyId: string;
-        secretAccessKey: string;
-        regions: string[];
-      },
+  body: unknown,
 ) {
+  const request = VerifyAwsConnectionRequest.safeParse(body);
+
+  if (!request.success) {
+    throw new Error("Enter a valid AWS role, access keys, and supported regions.");
+  }
+
   const response = await fetch(`/api/connections/${connectionId}/verify`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
+    body: JSON.stringify(request.data),
   });
   const responseBody: unknown = await response.json();
-  const connection = awsConnectionResponseSchema.safeParse(responseBody);
+  const connection = AwsConnectionResponse.safeParse(responseBody);
 
   if (!response.ok || !connection.success) {
     throw new Error("Could not verify the AWS connection.");

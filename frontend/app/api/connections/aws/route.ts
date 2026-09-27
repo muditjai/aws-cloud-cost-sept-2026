@@ -1,11 +1,9 @@
-import {
-  createAwsConnectionSchema,
-} from "@/lib/cloud-connections/contracts";
+import { CreateAwsConnectionRequest } from "@/lib/connect/types";
 import { apiError, parseJsonBody } from "@/lib/cloud-connections/http";
 import { createAwsConnection } from "@/lib/cloud-connections/repository";
 
 export async function POST(request: Request) {
-  const parsedBody = await parseJsonBody(request, createAwsConnectionSchema);
+  const parsedBody = await parseJsonBody(request, CreateAwsConnectionRequest);
 
   if ("response" in parsedBody) {
     return parsedBody.response;

@@ -1,8 +1,8 @@
 import { z } from "zod";
-import { createIngestionRunSchema } from "@/lib/cloud-connections/contracts";
+import { CreateIngestionRequest } from "@/lib/connect/types";
 import { apiError, parseJsonBody } from "@/lib/cloud-connections/http";
 import {
-  createIngestionRun,
+  createIngestion,
   getConnection,
 } from "@/lib/cloud-connections/repository";
 
@@ -41,13 +41,13 @@ export async function POST(
     });
   }
 
-  const parsedBody = await parseJsonBody(request, createIngestionRunSchema);
+  const parsedBody = await parseJsonBody(request, CreateIngestionRequest);
 
   if ("response" in parsedBody) {
     return parsedBody.response;
   }
 
-  const ingestionRun = await createIngestionRun({
+  const ingestionRun = await createIngestion({
     connectionId: connection.id,
     kind: parsedBody.data.kind,
     regions: parsedBody.data.regions ?? connection.regions,

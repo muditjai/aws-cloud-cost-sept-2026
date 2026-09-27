@@ -3,7 +3,7 @@ import {
   GetCallerIdentityCommand,
   STSClient,
 } from "@aws-sdk/client-sts";
-import type { VerifyAwsConnectionInput } from "@/lib/cloud-connections/contracts";
+import { VerifyAwsConnectionRequest } from "@/lib/connect/types";
 
 export class AwsConnectionCheckError extends Error {
   constructor() {
@@ -15,7 +15,7 @@ export async function verifyAwsConnection({
   connection,
   externalId,
 }: {
-  connection: VerifyAwsConnectionInput;
+  connection: VerifyAwsConnectionRequest;
   externalId: string | null;
 }) {
   const region = connection.regions[0] ?? "us-east-1";
@@ -31,7 +31,6 @@ export async function verifyAwsConnection({
           credentials: {
             accessKeyId: connection.accessKeyId,
             secretAccessKey: connection.secretAccessKey,
-            sessionToken: connection.sessionToken,
           },
         });
 

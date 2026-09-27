@@ -1,11 +1,11 @@
 import type { CloudConnection, IngestionRun } from "@/generated/prisma/client";
 import {
-  awsConnectionResponseSchema,
-  awsRegionsSchema,
-  type CreateAwsConnectionInput,
-  type CreateIngestionRunInput,
-  ingestionRunResponseSchema,
-} from "@/lib/cloud-connections/contracts";
+  AwsConnectionResponse,
+  CreateAwsConnectionRequest,
+  CreateIngestionRequest,
+  CreateIngestionResponse,
+  defaultAwsRegion,
+} from "@/lib/connect/types";
 import { database } from "@/lib/cloud-connections/database";
 
 function serializeRegions(regions: string[]) {
@@ -14,14 +14,14 @@ function serializeRegions(regions: string[]) {
 
 function parseRegions(regionsJson: string) {
   try {
-    return awsRegionsSchema.parse(JSON.parse(regionsJson));
+    return AwsConnectionResponse.shape.regions.parse(JSON.parse(regionsJson));
   } catch {
-    return ["us-east-1"];
+    return [defaultAwsRegion];
   }
 }
 
 function toConnectionResponse(connection: CloudConnection) {
-  return awsConnectionResponseSchema.parse({
+  return AwsConnectionResponse.parse({
     id: connection.id,
     provider: connection.provider,
     authMethod: connection.authMethod,
@@ -33,13 +33,11 @@ function toConnectionResponse(connection: CloudConnection) {
     principalArn: connection.principalArn,
     verificationError: connection.verificationError,
     credentialsPersisted: connection.credentialReference !== null,
-    createdAt: connection.createdAt.toISOString(),
-    updatedAt: connection.updatedAt.toISOString(),
   });
 }
 
 function toIngestionRunResponse(ingestionRun: IngestionRun) {
-  return ingestionRunResponseSchema.parse({
+  return CreateIngestionResponse.parse({
     id: ingestionRun.id,
     connectionId: ingestionRun.connectionId,
     kind: ingestionRun.kind,
@@ -48,15 +46,13 @@ function toIngestionRunResponse(ingestionRun: IngestionRun) {
     error: ingestionRun.error,
     startedAt: ingestionRun.startedAt?.toISOString() ?? null,
     completedAt: ingestionRun.completedAt?.toISOString() ?? null,
-    createdAt: ingestionRun.createdAt.toISOString(),
-    updatedAt: ingestionRun.updatedAt.toISOString(),
   });
 }
 
 export async function createAwsConnection({
   authMethod,
   regions,
-}: CreateAwsConnectionInput) {
+}: CreateAwsConnectionRequest) {
   const connection = await database.cloudConnection.create({
     data: {
       provider: "aws",
@@ -124,11 +120,11 @@ export async function markConnectionFailed({
   return toConnectionResponse(connection);
 }
 
-export async function createIngestionRun({
+export async function createIngestion({
   connectionId,
   kind,
   regions,
-}: CreateIngestionRunInput & { connectionId: string }) {
+}: CreateIngestionRequest & { connectionId: string }) {
   const ingestionRun = await database.ingestionRun.create({
     data: {
       connectionId,

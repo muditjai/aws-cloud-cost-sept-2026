@@ -12,10 +12,10 @@ POST /api/connections/:connectionId/ingestions
 GET  /api/ingestions/:ingestionId
 ```
 
-`lib/cloud-connections/contracts.ts` is safe to import from both the browser and server. It defines request and response schemas and derives their TypeScript types. The remaining modules are server-only by convention:
+`lib/connect/types.ts` is safe to import from both the browser and server. It defines request and response schemas and derives their TypeScript types. The remaining modules are server-only by convention:
 
 ```text
-contracts → route handler → connection checker/service → repository → database
+types → route handler → connection checker/service → repository → database
 ```
 
 Do not import a repository, Prisma client, AWS SDK, or secret-store implementation into a Client Component.

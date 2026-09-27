@@ -1,7 +1,5 @@
 import { z } from "zod";
-import {
-  verifyAwsConnectionSchema,
-} from "@/lib/cloud-connections/contracts";
+import { VerifyAwsConnectionRequest } from "@/lib/connect/types";
 import {
   AwsConnectionCheckError,
   verifyAwsConnection,
@@ -40,7 +38,7 @@ export async function POST(
     });
   }
 
-  const parsedBody = await parseJsonBody(request, verifyAwsConnectionSchema);
+  const parsedBody = await parseJsonBody(request, VerifyAwsConnectionRequest);
 
   if ("response" in parsedBody) {
     return parsedBody.response;
