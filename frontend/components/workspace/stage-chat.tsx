@@ -41,7 +41,7 @@ function WorkflowWelcome() {
   return (
     <div className="mb-8 flex max-w-xl flex-col px-2">
       <div className="mb-5 flex size-11 items-center justify-center rounded-xl border border-sky-200 bg-sky-50 text-sky-700 shadow-sm">
-        <WorkflowIcon className="size-5" aria-hidden="true" />
+        <WorkflowIcon className="s ize-5" aria-hidden="true" />
       </div>
       <p className="text-xs font-semibold tracking-[0.14em] text-sky-700 uppercase">
         {workflow.label}

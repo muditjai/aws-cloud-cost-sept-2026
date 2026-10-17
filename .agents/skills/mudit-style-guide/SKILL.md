@@ -11,7 +11,7 @@ This document defines the strict coding conventions, architectural boundaries, a
 ---
 
 ## 0. General Principles
-1. **Variable Naming:** Use descriptive name eg "aws-role" or "aws-key" instead of generic names like "role" or "key". Avoid abbreviations unless they are widely recognized.
+1. **Variable Naming:** Use descriptive names eg "aws-role" or "aws-key" instead of generic names like "role" or "key". Avoid abbreviations unless they are widely recognized.
 
 
 ## 1. Core Architectural Philosophy

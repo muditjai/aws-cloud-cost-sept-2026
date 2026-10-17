@@ -1,4 +1,5 @@
 # AGENTS.md
+This doc describes highly important steps to follow while planning and making code changes.
 
 ## Planning
 - First read the skills, instructions, existing file/code structure and then decide how to solve the problem. Then come up with a plan. If the plan is non obvious or convoluted or some parts are contradictory, then ask me about it.
